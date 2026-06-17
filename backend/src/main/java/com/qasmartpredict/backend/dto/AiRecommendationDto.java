@@ -10,6 +10,7 @@ public class AiRecommendationDto {
     private String riskLevel;
 
     private String summary;
+	 private String executiveSummary;
 
     private List<String> recommendations;
 	private List<String> strengths;
