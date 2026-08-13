@@ -53,12 +53,24 @@ public class QualityIntelligenceService {
         double incidentWeight =
                 weights.getOrDefault("INCIDENT", 0.0);
 
-        double finalScore =
-                (coverage.getCoveragePercentage() * coverageWeight
-                        + defect.getDefectScore() * defectWeight
-                        + feedbackScore * feedbackWeight
-                        + incidentScore * incidentWeight)
-                        / 100.0;
+       double totalWeight =
+        coverageWeight
+        + defectWeight
+        + feedbackWeight
+        + incidentWeight;
+
+		double finalScore = 0.0;
+
+		if (totalWeight > 0) {
+			finalScore =
+					(
+							coverage.getCoveragePercentage() * coverageWeight
+							+ defect.getDefectScore() * defectWeight
+							+ feedbackScore * feedbackWeight
+							+ incidentScore * incidentWeight
+					)
+					/ totalWeight;
+		}
 
         QualityIntelligenceDto dto =
                 new QualityIntelligenceDto();
