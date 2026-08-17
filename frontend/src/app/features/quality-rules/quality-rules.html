@@ -1,0 +1,41 @@
+<div class="rules-container">
+
+  <h1>Quality Rule Designer</h1>
+
+  <p class="subtitle">
+    Configure the weighting of each quality dimension used to calculate the Quality Intelligence Score.
+  </p>
+
+  <div class="total-card">
+    Total weights:
+    <strong>{{ getTotalWeight() }} %</strong>
+  </div>
+
+  <div class="message" *ngIf="message">
+    {{ message }}
+  </div>
+
+  <div class="rule-card" *ngFor="let rule of rules">
+
+    <div class="rule-info">
+      <h3>{{ rule.ruleName }}</h3>
+      <p>Status: {{ rule.enabled ? 'Enabled' : 'Disabled' }}</p>
+    </div>
+
+    <div class="rule-edit">
+      <input
+        type="number"
+        min="0"
+        max="100"
+        [(ngModel)]="rule.weight">
+
+      <span>%</span>
+
+      <button (click)="saveRule(rule)">
+        Save
+      </button>
+    </div>
+
+  </div>
+
+</div>

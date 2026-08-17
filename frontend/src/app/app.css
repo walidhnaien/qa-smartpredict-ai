@@ -1,0 +1,43 @@
+.app-header {
+  height: 64px;
+  padding: 0 24px;
+  background: #111827;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.user-zone {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.welcome {
+  font-size: 14px;
+}
+
+.logout-btn,
+.login-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.logout-btn {
+  background: #dc2626;
+  color: white;
+}
+
+.login-btn {
+  background: #2563eb;
+  color: white;
+}

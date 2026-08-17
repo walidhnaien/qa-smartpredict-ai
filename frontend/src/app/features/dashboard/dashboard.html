@@ -1,0 +1,444 @@
+<div class="container">
+
+  <h1>QA SmartPredict AI</h1>
+
+  <div *ngIf="score">
+
+    <div class="qis-card">
+
+      <h2>Quality Intelligence Score</h2>
+	  <div class="qis-value">
+        {{ qisSonar?.finalQis ?? score.qualityIntelligenceScore | number:'1.0-2' }}
+      </div>
+	  <div class="badge acceptable"
+    
+	   [ngClass]="getStatus()">
+
+  {{ getFinalScore() >= 80
+      ? 'EXCELLENT'
+      : getFinalScore() >= 60
+        ? 'ACCEPTABLE'
+        : 'CRITICAL'
+  }}
+	
+		</div>
+
+      <div class="progress-bar">
+
+		<div
+		class="progress-fill"
+		 [style.width.%]="qisSonar?.finalQis ?? score.qualityIntelligenceScore">
+		</div>
+
+	
+      </div>
+
+      <div class="status" [ngClass]="getStatus()">
+
+				 <span *ngIf="getFinalScore() >= 80">
+			🟢 Excellent
+		  </span>
+
+		  <span
+			*ngIf="getFinalScore() >= 60
+			&& getFinalScore() < 80">
+			🟡 Acceptable
+		  </span>
+
+		  <span *ngIf="getFinalScore() < 60">
+			🔴 Critique
+		  </span>
+
+      </div>
+
+    </div>
+
+    <div class="kpi-grid">
+
+      <div class="kpi-card coverage" >
+        <h3>Coverage</h3>
+        <div class="kpi-value">
+          {{ score.coverageScore | number:'1.0-2' }} %
+        </div>
+      </div>
+
+      <div class="kpi-card defect">
+        <h3>Defect</h3>
+        <div class="kpi-value">
+          {{ score.defectScore | number:'1.0-2' }} %
+        </div>
+      </div>
+
+      <div class="kpi-card feedback">
+        <h3>Feedback</h3>
+        <div class="kpi-value">
+          {{ score.feedbackScore | number:'1.0-2' }} %
+        </div>
+      </div>
+
+      <div class="kpi-card incident">
+        <h3>Incident</h3>
+        <div class="kpi-value">
+          {{ score.incidentScore | number:'1.0-2' }} %
+        </div>
+      </div>
+	  
+	  <div class="kpi-card sonar" *ngIf="qisSonar">
+
+		  <h3>Sonar Quality</h3>
+
+		  <div class="kpi-value">
+			{{ qisSonar.sonarScore | number:'1.0-2' }} %
+		  </div>
+
+		  <div class="kpi-detail">
+			Weight: {{ qisSonar.sonarWeight * 100 }} %
+		  </div>
+
+	  </div>
+	  
+	  <div class="breakdown-card" *ngIf="score">
+
+  <h2>Quality Score Breakdown</h2>
+
+  <p class="breakdown-subtitle">
+    Contribution of each quality dimension to the final QIS
+  </p>
+
+
+  <div class="breakdown-row">
+
+    <div class="breakdown-name">
+      Coverage
+    </div>
+
+    <div class="breakdown-score">
+      {{ score.coverageScore | number:'1.0-2' }}
+    </div>
+
+    <div class="breakdown-weight">
+      × {{ getRuleWeight('coverage') }} %
+    </div>
+
+    <div class="breakdown-contribution">
+      =
+      {{ getContribution(
+          score.coverageScore,
+          'coverage'
+        ) | number:'1.0-2'
+      }}
+    </div>
+
+  </div>
+
+
+  <div class="breakdown-row">
+
+    <div class="breakdown-name">
+      Defect
+    </div>
+
+    <div class="breakdown-score">
+      {{ score.defectScore | number:'1.0-2' }}
+    </div>
+
+    <div class="breakdown-weight">
+      × {{ getRuleWeight('defect') }} %
+    </div>
+
+    <div class="breakdown-contribution">
+      =
+      {{ getContribution(
+          score.defectScore,
+          'defect'
+        ) | number:'1.0-2'
+      }}
+    </div>
+
+  </div>
+
+
+  <div class="breakdown-row">
+
+    <div class="breakdown-name">
+      Feedback
+    </div>
+
+    <div class="breakdown-score">
+      {{ score.feedbackScore | number:'1.0-2' }}
+    </div>
+
+    <div class="breakdown-weight">
+      × {{ getRuleWeight('feedback') }} %
+    </div>
+
+    <div class="breakdown-contribution">
+      =
+      {{ getContribution(
+          score.feedbackScore,
+          'feedback'
+        ) | number:'1.0-2'
+      }}
+    </div>
+
+  </div>
+
+
+  <div class="breakdown-row">
+
+    <div class="breakdown-name">
+      Incident
+    </div>
+
+    <div class="breakdown-score">
+      {{ score.incidentScore | number:'1.0-2' }}
+    </div>
+
+    <div class="breakdown-weight">
+      × {{ getRuleWeight('incident') }} %
+    </div>
+
+    <div class="breakdown-contribution">
+      =
+      {{ getContribution(
+          score.incidentScore,
+          'incident'
+        ) | number:'1.0-2'
+      }}
+    </div>
+
+  </div>
+
+
+  <div class="breakdown-row sonar-row"
+       *ngIf="qisSonar">
+
+    <div class="breakdown-name">
+      Sonar Quality
+    </div>
+
+    <div class="breakdown-score">
+      {{ qisSonar.sonarScore | number:'1.0-2' }}
+    </div>
+
+    <div class="breakdown-weight">
+      × {{ qisSonar.sonarWeight * 100 }} %
+    </div>
+
+    <div class="breakdown-contribution">
+      =
+      {{ qisSonar.sonarContribution | number:'1.0-2' }}
+    </div>
+
+  </div>
+
+
+  <div class="breakdown-total">
+
+    <span>
+      Final Quality Intelligence Score
+    </span>
+
+    <strong>
+      {{ getFinalScore() | number:'1.0-2' }}
+    </strong>
+
+  </div>
+
+</div>
+
+
+
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	
+
+	
+	  <div class="sonar-card" *ngIf="qisSonar as sonar">
+
+  <h2>SonarQube Analysis</h2>
+
+  <div class="sonar-grid">
+
+    <div>
+      <span>Bugs</span>
+      <strong>{{ sonar.bugs }}</strong>
+    </div>
+
+    <div>
+      <span>Vulnerabilities</span>
+      <strong>{{ sonar.vulnerabilities }}</strong>
+    </div>
+
+    <div>
+      <span>Code Smells</span>
+      <strong>{{ sonar.codeSmells }}</strong>
+    </div>
+
+    <div>
+      <span>Code Coverage</span>
+      <strong>
+        {{ sonar.coverage | number:'1.0-2' }} %
+      </strong>
+    </div>
+
+    <div>
+      <span>Duplication</span>
+      <strong>
+        {{ sonar.duplicatedLinesDensity | number:'1.0-2' }} %
+      </strong>
+    </div>
+
+  </div>
+
+  <div class="sonar-contribution">
+
+    Sonar contribution to QIS:
+
+    <strong>
+      {{ sonar.sonarContribution | number:'1.0-2' }}
+    </strong>
+
+  </div>
+
+</div>
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+
+    </div>
+	
+	<div class="ai-card" *ngIf="aiRecommendation as ai">
+
+  <h2>AI QA Assistant</h2>
+  
+  <div class="rule-designer">
+
+  <h2>Quality Rule Designer</h2>
+
+  <p class="rule-subtitle">
+    Adjust the weighting of each quality dimension used to calculate the QIS.
+  </p>
+
+  <div class="total-weight">
+    Total Weight:
+    <strong>{{ getTotalWeight() }} %</strong>
+  </div>
+
+  <div class="rule-message" *ngIf="ruleMessage">
+    {{ ruleMessage }}
+  </div>
+
+  <div class="rule-row" *ngFor="let rule of rules">
+
+    <div class="rule-name">
+      {{ rule.ruleName }}
+    </div>
+
+    <input
+      type="range"
+      min="0"
+      max="100"
+      [(ngModel)]="rule.weight">
+
+    <div class="rule-value">
+      {{ rule.weight }} %
+    </div>
+
+    <button (click)="saveRule(rule)">
+      Apply
+    </button>
+
+  </div>
+
+</div>
+  <div class="ai-badge">
+
+  🤖 AI Generated Analysis
+
+</div>
+<div class="analysis-date">
+
+  Analysis generated on:
+  {{ analysisDate | date:'dd/MM/yyyy HH:mm' }}
+
+</div>
+
+  <div class="ai-summary">
+    {{ ai.summary }}
+  </div>
+  <div class="executive-summary">
+   <h3>AI Executive Analysis</h3>
+
+  <p>
+    {{ ai.executiveSummary }}
+  </p>
+
+  </div>
+  
+  
+
+<div class="ai-risk">
+  Risk Level: {{ ai.riskLevel }}
+</div>
+
+  <div class="ai-decision">
+    Decision: {{ ai.sprintDecision }}
+  </div>
+
+  <div class="ai-grid">
+
+    <div class="strengths">
+      <h3>Strengths</h3>
+      <ul>
+        <li *ngFor="let s of ai.strengths">✓ {{ s }}</li>
+      </ul>
+    </div>
+
+    <div class="weaknesses">
+      <h3>Weaknesses</h3>
+      <ul>
+        <li *ngFor="let w of ai.weaknesses">✗ {{ w }}</li>
+      </ul>
+    </div>
+
+    <div class="recommendations">
+      <h3>Recommendations</h3>
+      <ul>
+        <li *ngFor="let r of ai.recommendations">• {{ r }}</li>
+      </ul>
+    </div>
+
+  </div>
+
+</div>
+	
+	
+
+  </div>
+
+</div>

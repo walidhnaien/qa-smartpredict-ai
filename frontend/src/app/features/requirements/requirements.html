@@ -1,0 +1,24 @@
+<h1>QA SmartPredict AI</h1>
+<h2>Requirements</h2>
+
+<p>Nombre de requirements : {{ requirements.length }}</p>
+
+<table border="1">
+  <thead>
+    <tr>
+      <th>Code</th>
+      <th>Titre</th>
+      <th>Criticité</th>
+      <th>Statut</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let req of requirements">
+      <td>{{ req.code }}</td>
+      <td>{{ req.title }}</td>
+      <td>{{ req.criticality }}</td>
+      <td>{{ req.status }}</td>
+    </tr>
+  </tbody>
+</table>
