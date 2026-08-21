@@ -1,0 +1,151 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.advisor-card {
+  background: white;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.07);
+}
+
+.advisor-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  color: #64748b;
+}
+
+.advisor-header h2 {
+  margin: 6px 0 0;
+}
+
+.header-badges {
+  display: flex;
+  gap: 10px;
+}
+
+.risk-badge,
+.decision-badge {
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.low,
+.go {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.medium,
+.risk {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.high,
+.no-go {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.summary-card,
+.rationale-card,
+.manager-message {
+  margin-top: 22px;
+  padding: 18px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.advisor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.section {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 18px;
+}
+
+.risk-item,
+.action-item {
+  margin-top: 14px;
+  padding: 14px;
+  background: white;
+  border-radius: 10px;
+}
+
+.risk-line {
+  display: flex;
+  justify-content: space-between;
+}
+
+.action-item {
+  display: flex;
+  gap: 12px;
+}
+
+.priority {
+  font-weight: 700;
+}
+
+.forecast {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.forecast > div {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+}
+
+.forecast span {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.forecast strong {
+  display: block;
+  margin-top: 5px;
+}
+
+.confidence {
+  margin-top: 20px;
+  padding: 16px;
+  background: #eff6ff;
+  border-radius: 10px;
+}
+
+.confidence p {
+  margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+
+  .advisor-grid,
+  .forecast {
+    grid-template-columns: 1fr;
+  }
+
+  .advisor-header {
+    flex-direction: column;
+  }
+}

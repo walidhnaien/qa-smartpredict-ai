@@ -1,0 +1,79 @@
+<div class="breakdown-card">
+
+  <div class="header">
+
+    <div class="eyebrow">
+      QUALITY COMPOSITION
+    </div>
+
+    <h2>
+      Quality Score Breakdown
+    </h2>
+
+    <p>
+      Contribution of each quality dimension
+      to the final QIS
+    </p>
+
+  </div>
+
+
+  <div class="chart-wrapper">
+
+    <canvas #breakdownChart></canvas>
+
+    <div class="chart-center">
+
+      <div class="qis">
+        {{ finalQis | number:'1.0-2' }}
+      </div>
+
+      <div class="qis-label">
+        FINAL QIS
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="contribution-grid">
+
+    <div>
+      <span>Coverage</span>
+      <strong>
+        {{ coverageContribution | number:'1.0-2' }}
+      </strong>
+    </div>
+
+    <div>
+      <span>Defect</span>
+      <strong>
+        {{ defectContribution | number:'1.0-2' }}
+      </strong>
+    </div>
+
+    <div>
+      <span>Feedback</span>
+      <strong>
+        {{ feedbackContribution | number:'1.0-2' }}
+      </strong>
+    </div>
+
+    <div>
+      <span>Incident</span>
+      <strong>
+        {{ incidentContribution | number:'1.0-2' }}
+      </strong>
+    </div>
+
+    <div>
+      <span>Sonar</span>
+      <strong>
+        {{ sonarContribution | number:'1.0-2' }}
+      </strong>
+    </div>
+
+  </div>
+
+</div>

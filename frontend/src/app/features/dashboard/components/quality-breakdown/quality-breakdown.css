@@ -1,0 +1,86 @@
+.breakdown-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.07);
+}
+
+.header {
+  text-align: center;
+}
+
+.header h2 {
+  margin: 6px 0;
+}
+
+.header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  color: #64748b;
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 300px;
+  max-width: 430px;
+  margin: 25px auto;
+}
+
+.chart-center {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.qis {
+  font-size: 36px;
+  font-weight: 700;
+}
+
+.qis-label {
+  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 1px;
+}
+
+.contribution-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.contribution-grid div {
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.contribution-grid span {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.contribution-grid strong {
+  display: block;
+  margin-top: 5px;
+}
+
+@media (max-width: 800px) {
+
+  .contribution-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

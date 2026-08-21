@@ -1,0 +1,96 @@
+<div class="release-card">
+
+  <div class="release-header">
+
+    <div>
+
+      <div class="eyebrow">
+        RELEASE READINESS
+      </div>
+
+      <h2>
+        Release Decision
+      </h2>
+
+    </div>
+
+    <div
+      class="decision-badge"
+      [ngClass]="getDecisionClass()">
+
+      {{ getDecision() }}
+
+    </div>
+
+  </div>
+
+
+  <div class="readiness">
+
+    <div class="readiness-value">
+      {{ getReadiness() | number:'1.0-2' }} %
+    </div>
+
+    <div class="readiness-label">
+      Overall Release Readiness
+    </div>
+
+  </div>
+
+
+  <div class="release-progress">
+
+    <div
+      class="release-progress-value"
+      [style.width.%]="getReadiness()">
+    </div>
+
+  </div>
+
+
+  <div class="release-columns">
+
+    <div class="release-section">
+
+      <h3>
+        Decision Factors
+      </h3>
+
+      <div
+        class="factor"
+        *ngFor="let reason of getReasons()">
+
+        <span class="factor-icon">•</span>
+
+        <span>
+          {{ reason }}
+        </span>
+
+      </div>
+
+    </div>
+
+
+    <div class="release-section">
+
+      <h3>
+        Recommended Actions
+      </h3>
+
+      <div
+        class="factor"
+        *ngFor="let action of getActions()">
+
+        <span class="factor-icon">→</span>
+
+        <span>
+          {{ action }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

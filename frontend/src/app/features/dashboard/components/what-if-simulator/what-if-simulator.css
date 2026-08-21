@@ -1,0 +1,293 @@
+.simulator-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.07);
+}
+
+.simulator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  color: #64748b;
+}
+
+.simulator-header h2 {
+  margin: 6px 0;
+}
+
+.simulator-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.reset-button {
+  border: 0;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.score-comparison {
+  display: grid;
+  grid-template-columns:
+    1fr auto 1fr 1fr;
+  gap: 20px;
+  align-items: center;
+  margin-top: 28px;
+}
+
+.score-box,
+.delta {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+}
+
+.score-box span,
+.delta span {
+  display: block;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.score-box strong {
+  display: block;
+  font-size: 36px;
+  margin: 6px 0;
+}
+
+.delta strong {
+  display: block;
+  font-size: 28px;
+  margin-top: 6px;
+}
+
+.delta small {
+  color: #64748b;
+}
+
+.delta.positive strong {
+  color: #16a34a;
+}
+
+.delta.negative strong {
+  color: #dc2626;
+}
+
+.decision {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.arrow {
+  font-size: 28px;
+  color: #64748b;
+}
+
+.simulation-grid {
+  margin-top: 30px;
+}
+
+.simulation-row {
+  display: grid;
+  grid-template-columns:
+    180px 1fr 90px;
+  gap: 20px;
+  align-items: center;
+  padding: 18px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.metric-info strong {
+  display: block;
+}
+
+.metric-info span {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.simulation-row input {
+  width: 100%;
+}
+
+.simulation-value {
+  text-align: right;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.simulation-footer {
+  margin-top: 20px;
+  padding: 12px;
+  background: #eff6ff;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 11px;
+  color: #1e40af;
+}
+
+@media (max-width: 800px) {
+
+  .score-comparison {
+    grid-template-columns: 1fr;
+  }
+
+  .arrow {
+    transform: rotate(90deg);
+    text-align: center;
+  }
+
+  .simulation-row {
+    grid-template-columns: 1fr;
+  }
+
+  .simulation-value {
+    text-align: left;
+  }
+}
+
+
+.go-advisor {
+  margin-top: 28px;
+  padding: 22px;
+  background: #f8fafc;
+  border-radius: 14px;
+}
+
+.advisor-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.advisor-title h3 {
+  margin: 5px 0 0;
+}
+
+.target-badge {
+  background: #dcfce7;
+  color: #166534;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.advisor-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.advisor-summary > div {
+  background: white;
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.advisor-summary span {
+  display: block;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.advisor-summary strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 18px;
+}
+
+.recommendation-card {
+  margin-top: 18px;
+  background: white;
+  padding: 18px;
+  border-radius: 12px;
+}
+
+.recommendation-label {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.recommendation-card h3 {
+  margin: 5px 0 16px;
+  font-size: 22px;
+}
+
+.recommendation-values {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+}
+
+.recommendation-values div {
+  text-align: center;
+}
+
+.recommendation-values span {
+  display: block;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.recommendation-values strong {
+  font-size: 18px;
+}
+
+.recommendation-arrow {
+  font-size: 22px;
+}
+
+.recommendation-card p {
+  margin-top: 18px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #475569;
+}
+
+.apply-scenario {
+  width: 100%;
+  margin-top: 10px;
+  padding: 11px;
+  border: 0;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.already-go {
+  margin-top: 18px;
+  padding: 15px;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 10px;
+}
+
+.no-solution {
+  margin-top: 18px;
+  padding: 15px;
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 10px;
+}

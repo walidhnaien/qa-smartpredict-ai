@@ -1,0 +1,115 @@
+.release-card {
+  margin-top: 24px;
+  padding: 28px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.07);
+}
+
+.release-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.release-header h2 {
+  margin: 5px 0 0;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  color: #64748b;
+}
+
+.decision-badge {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.decision-badge.go {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.decision-badge.risk {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.decision-badge.no-go {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.readiness {
+  margin-top: 25px;
+}
+
+.readiness-value {
+  font-size: 36px;
+  font-weight: 700;
+}
+
+.readiness-label {
+  margin-top: 3px;
+  color: #64748b;
+}
+
+.release-progress {
+  margin-top: 15px;
+  height: 9px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.release-progress-value {
+  height: 100%;
+  background: #2563eb;
+}
+
+.release-columns {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 35px;
+}
+
+.release-section {
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.release-section h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.factor {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+.factor-icon {
+  font-weight: 700;
+}
+
+@media (max-width: 800px) {
+
+  .release-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .release-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

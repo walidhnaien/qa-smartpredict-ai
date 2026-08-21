@@ -1,0 +1,84 @@
+<div class="kpi-card">
+
+  <div class="kpi-header">
+
+    <div>
+
+      <div class="eyebrow">
+        QUALITY DIMENSION
+      </div>
+
+      <h3>
+        {{ title }}
+      </h3>
+
+    </div>
+
+    <div
+      class="status-badge"
+      [ngClass]="getStatusClass()">
+
+      {{ status }}
+
+    </div>
+
+  </div>
+
+
+  <div class="score-section">
+
+    <div class="score">
+      {{ score | number:'1.0-2' }} %
+    </div>
+
+  </div>
+
+
+  <div class="progress">
+
+    <div
+      class="progress-value"
+      [style.width.%]="score">
+    </div>
+
+  </div>
+
+
+  <div class="details-grid">
+
+    <div
+      class="detail"
+      *ngFor="let detail of details">
+
+      <span>
+        {{ detail.label }}
+      </span>
+
+      <strong>
+        {{ detail.value }}
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <div class="footer">
+
+    <div>
+      QIS Weight
+      <strong>
+        {{ weight | number:'1.0-2' }} %
+      </strong>
+    </div>
+
+    <div>
+      Contribution
+      <strong>
+        {{ contribution | number:'1.0-2' }}
+      </strong>
+    </div>
+
+  </div>
+
+</div>

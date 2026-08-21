@@ -1,0 +1,60 @@
+<div class="timeline-card">
+
+  <div class="timeline-header">
+
+    <div>
+
+      <div class="eyebrow">
+        QUALITY EVOLUTION
+      </div>
+
+      <h2>
+        Quality Timeline
+      </h2>
+
+      <p>
+        Evolution of the main quality indicators
+        across analyses
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <div
+    *ngIf="loading"
+    class="state-message">
+
+    Loading history...
+
+  </div>
+
+
+  <div
+    *ngIf="error"
+    class="state-message error">
+
+    {{ error }}
+
+  </div>
+
+
+  <div
+    *ngIf="!loading && !error && history.length === 0"
+    class="state-message">
+
+    No quality history available yet.
+
+  </div>
+
+
+  <div
+    class="chart-wrapper"
+    *ngIf="history.length > 0">
+
+    <canvas #timelineChart></canvas>
+
+  </div>
+
+</div>

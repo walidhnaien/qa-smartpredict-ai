@@ -1,0 +1,61 @@
+.executive-card {
+  background: white;
+  border-radius: 18px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+}
+
+.subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: #64748b;
+}
+
+.score {
+  margin-top: 10px;
+  font-size: 64px;
+  font-weight: 700;
+}
+
+.score-total {
+  color: #64748b;
+}
+
+.decision {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.excellent {
+  background: #dcfce7;
+}
+
+.acceptable {
+  background: #fef3c7;
+}
+
+.critical {
+  background: #fee2e2;
+}
+
+.progress {
+  height: 9px;
+  margin-top: 24px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-value {
+  height: 100%;
+  background: #2563eb;
+}
+
+.health {
+  margin-top: 18px;
+}

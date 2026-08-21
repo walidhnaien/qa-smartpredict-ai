@@ -1,0 +1,159 @@
+<div class="sonar-health-card" *ngIf="sonar as s">
+
+  <div class="sonar-header">
+
+    <div>
+      <div class="eyebrow">
+        TECHNICAL QUALITY
+      </div>
+
+      <h2>Sonar Health</h2>
+    </div>
+
+    <div
+      class="health-badge"
+      [ngClass]="getStatusClass()">
+
+      {{ getHealthStatus() }}
+
+    </div>
+
+  </div>
+
+
+  <div class="sonar-score-section">
+
+    <div class="sonar-score">
+      {{ s.sonarScore | number:'1.0-2' }}
+    </div>
+
+    <div class="score-unit">
+      / 100
+    </div>
+
+    <div class="score-label">
+      Technical Quality Score
+    </div>
+
+  </div>
+
+
+  <div class="sonar-progress">
+
+    <div
+      class="sonar-progress-value"
+      [style.width.%]="s.sonarScore">
+    </div>
+
+  </div>
+
+
+  <div class="metrics-grid">
+
+    <div class="metric">
+
+      <span class="metric-label">
+        Bugs
+      </span>
+
+      <strong>
+        {{ s.bugs }}
+      </strong>
+
+    </div>
+
+
+    <div class="metric">
+
+      <span class="metric-label">
+        Vulnerabilities
+      </span>
+
+      <strong>
+        {{ s.vulnerabilities }}
+      </strong>
+
+    </div>
+
+
+    <div class="metric">
+
+      <span class="metric-label">
+        Code Smells
+      </span>
+
+      <strong>
+        {{ s.codeSmells }}
+      </strong>
+
+    </div>
+
+
+    <div class="metric">
+
+      <span class="metric-label">
+        Coverage
+      </span>
+
+      <strong>
+        {{ s.coverage | number:'1.0-2' }} %
+      </strong>
+
+      <span class="rating">
+        {{ getCoverageRating() }}
+      </span>
+
+    </div>
+
+
+    <div class="metric">
+
+      <span class="metric-label">
+        Duplication
+      </span>
+
+      <strong>
+        {{ s.duplicatedLinesDensity | number:'1.0-2' }} %
+      </strong>
+
+      <span class="rating">
+        {{ getDuplicationRating() }}
+      </span>
+
+    </div>
+
+
+    <div class="metric">
+
+      <span class="metric-label">
+        QIS Contribution
+      </span>
+
+      <strong>
+        {{ s.sonarContribution | number:'1.0-2' }}
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <div class="sonar-footer">
+
+    <div>
+      Weight in QIS
+      <strong>
+        {{ s.sonarWeight * 100 | number:'1.0-0' }} %
+      </strong>
+    </div>
+
+    <div>
+      Code Quality Coverage
+      <strong>
+        {{ s.coverage | number:'1.0-2' }} %
+      </strong>
+    </div>
+
+  </div>
+
+</div>

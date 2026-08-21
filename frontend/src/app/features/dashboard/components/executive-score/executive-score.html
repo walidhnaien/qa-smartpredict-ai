@@ -1,0 +1,41 @@
+<div class="executive-card" *ngIf="score">
+
+  <div class="subtitle">
+    QUALITY INTELLIGENCE SCORE
+  </div>
+
+  <div class="score">
+    {{ getFinalScore() | number:'1.0-2' }}
+  </div>
+
+  <div class="score-total">
+    / 100
+  </div>
+
+  <div
+    class="decision"
+    [ngClass]="getStatus()">
+
+    {{ getDecision() }}
+
+  </div>
+
+  <div class="progress">
+
+    <div
+      class="progress-value"
+      [style.width.%]="getFinalScore()">
+    </div>
+
+  </div>
+
+  <div class="health">
+
+    Project Health:
+    <strong>
+      {{ getFinalScore() | number:'1.0-0' }} %
+    </strong>
+
+  </div>
+
+</div>

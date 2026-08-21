@@ -1,0 +1,230 @@
+<div
+  class="advisor-card"
+  *ngIf="analysis as ai">
+
+  <div class="advisor-header">
+
+    <div>
+
+      <div class="eyebrow">
+        AI QUALITY INTELLIGENCE
+      </div>
+
+      <h2>
+        AI Quality Advisor
+      </h2>
+
+    </div>
+
+    <div class="header-badges">
+
+      <span
+        class="risk-badge"
+        [ngClass]="getRiskClass()">
+
+        Risk: {{ ai.riskLevel }}
+
+      </span>
+
+      <span
+        class="decision-badge"
+        [ngClass]="getDecisionClass()">
+
+        {{ ai.releaseDecision }}
+
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <div class="summary-card">
+
+    <h3>
+      Executive Summary
+    </h3>
+
+    <p>
+      {{ ai.aiAnalysis.executiveSummary }}
+    </p>
+
+  </div>
+
+
+  <div class="rationale-card">
+
+    <h3>
+      Why this decision?
+    </h3>
+
+    <p>
+      {{ ai.aiAnalysis.releaseRationale }}
+    </p>
+
+  </div>
+
+
+  <div class="advisor-grid">
+
+    <!-- TOP RISKS -->
+
+    <div class="section">
+
+      <h3>
+        Top Risks
+      </h3>
+
+      <div
+        class="risk-item"
+        *ngFor="
+          let risk of ai.aiAnalysis.topRisks
+        ">
+
+        <div class="risk-line">
+
+          <strong>
+            {{ risk.dimension }}
+          </strong>
+
+          <span>
+            {{ risk.severity }}
+          </span>
+
+        </div>
+
+        <p>
+          {{ risk.reason }}
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- PRIORITY ACTIONS -->
+
+    <div class="section">
+
+      <h3>
+        Priority Actions
+      </h3>
+
+      <div
+        class="action-item"
+        *ngFor="
+          let action of ai.aiAnalysis.priorityActions
+        ">
+
+        <div class="priority">
+          #{{ action.priority }}
+        </div>
+
+        <div>
+
+          <strong>
+            {{ action.action }}
+          </strong>
+
+          <p>
+            {{ action.expectedImpact }}
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- FORECAST -->
+
+  <div class="forecast">
+
+    <div>
+
+      <span>
+        Current QIS
+      </span>
+
+      <strong>
+        {{ ai.qis | number:'1.0-2' }}
+      </strong>
+
+    </div>
+
+    <div>
+
+      <span>
+        Predicted Next QIS
+      </span>
+
+      <strong>
+        {{
+          ai.forecast.predictedNextQis
+            | number:'1.0-2'
+        }}
+      </strong>
+
+    </div>
+
+    <div>
+
+      <span>
+        Trend
+      </span>
+
+      <strong>
+        {{ ai.forecast.trend }}
+      </strong>
+
+    </div>
+
+    <div>
+
+      <span>
+        Expected Release
+      </span>
+
+      <strong>
+        {{ ai.forecast.expectedReleaseStatus }}
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <!-- MANAGER MESSAGE -->
+
+  <div class="manager-message">
+
+    <h3>
+      Manager Message
+    </h3>
+
+    <p>
+      {{ ai.aiAnalysis.managerMessage }}
+    </p>
+
+  </div>
+
+
+  <!-- CONFIDENCE -->
+
+  <div class="confidence">
+
+    AI Confidence:
+    <strong>
+      {{ ai.confidence }} %
+    </strong>
+
+    <p>
+      {{ ai.aiAnalysis.confidenceExplanation }}
+    </p>
+
+  </div>
+
+</div>

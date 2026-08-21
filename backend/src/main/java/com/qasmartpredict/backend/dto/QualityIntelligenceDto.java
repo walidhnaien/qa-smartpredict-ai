@@ -14,4 +14,16 @@ public class QualityIntelligenceDto {
     private double incidentScore;
 
     private double qualityIntelligenceScore;
+
+    private int totalRequirements;
+
+private int coveredRequirements;
+
+private int uncoveredRequirements;
+
+private long totalStories;
+
+private long totalBugs;
+
+private double bugRatio;
 }

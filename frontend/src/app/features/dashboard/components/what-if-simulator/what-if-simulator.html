@@ -1,0 +1,394 @@
+<div class="simulator-card">
+
+  <div class="simulator-header">
+
+    <div>
+
+      <div class="eyebrow">
+        PREDICTIVE QA
+      </div>
+
+      <h2>What-If Simulator</h2>
+
+      <p>
+        Simulate quality improvements without modifying
+        real project data.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="reset-button"
+      (click)="reset()">
+
+      Reset Simulation
+
+    </button>
+
+  </div>
+
+
+  <!-- CURRENT VS SIMULATED -->
+
+  <div class="score-comparison">
+
+    <div class="score-box">
+
+      <span>Current QIS</span>
+
+      <strong>
+        {{ currentQis | number:'1.2-2' }}
+      </strong>
+
+      <div class="decision">
+        {{ currentDecision }}
+      </div>
+
+    </div>
+
+
+    <div class="arrow">
+      →
+    </div>
+
+
+    <div class="score-box simulated">
+
+      <span>Simulated QIS</span>
+
+      <strong>
+        {{ simulatedQis | number:'1.2-2' }}
+      </strong>
+
+      <div class="decision">
+        {{ getSimulationDecision(simulatedQis) }}
+      </div>
+
+    </div>
+
+
+    <div
+      class="delta"
+      [class.positive]="difference > 0"
+      [class.negative]="difference < 0">
+
+      <span>Impact</span>
+
+      <strong>
+        {{ difference > 0 ? '+' : '' }}
+        {{ difference | number:'1.2-2' }}
+      </strong>
+
+      <small>QIS points</small>
+
+    </div>
+
+  </div>
+
+
+  <!-- SIMULATION PARAMETERS -->
+
+  <div class="simulation-grid">
+
+
+    <!-- COVERAGE -->
+
+    <div class="simulation-row">
+
+      <div class="metric-info">
+
+        <strong>Coverage</strong>
+
+        <span>
+          Current:
+          {{ coverage | number:'1.0-2' }} %
+        </span>
+
+      </div>
+
+      <input
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        [(ngModel)]="simulatedCoverage">
+
+      <div class="simulation-value">
+        {{ simulatedCoverage | number:'1.0-2' }} %
+      </div>
+
+    </div>
+
+
+    <!-- DEFECT -->
+
+    <div class="simulation-row">
+
+      <div class="metric-info">
+
+        <strong>Defect Quality</strong>
+
+        <span>
+          Current:
+          {{ defect | number:'1.0-2' }} %
+        </span>
+
+      </div>
+
+      <input
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        [(ngModel)]="simulatedDefect">
+
+      <div class="simulation-value">
+        {{ simulatedDefect | number:'1.0-2' }} %
+      </div>
+
+    </div>
+
+
+    <!-- FEEDBACK -->
+
+    <div class="simulation-row">
+
+      <div class="metric-info">
+
+        <strong>Feedback</strong>
+
+        <span>
+          Current:
+          {{ feedback | number:'1.0-2' }} %
+        </span>
+
+      </div>
+
+      <input
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        [(ngModel)]="simulatedFeedback">
+
+      <div class="simulation-value">
+        {{ simulatedFeedback | number:'1.0-2' }} %
+      </div>
+
+    </div>
+
+
+    <!-- INCIDENT -->
+
+    <div class="simulation-row">
+
+      <div class="metric-info">
+
+        <strong>Incident</strong>
+
+        <span>
+          Current:
+          {{ incident | number:'1.0-2' }} %
+        </span>
+
+      </div>
+
+      <input
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        [(ngModel)]="simulatedIncident">
+
+      <div class="simulation-value">
+        {{ simulatedIncident | number:'1.0-2' }} %
+      </div>
+
+    </div>
+
+
+    <!-- SONAR -->
+
+    <div class="simulation-row">
+
+      <div class="metric-info">
+
+        <strong>Sonar Quality</strong>
+
+        <span>
+          Current:
+          {{ sonar | number:'1.0-2' }} %
+        </span>
+
+      </div>
+
+      <input
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        [(ngModel)]="simulatedSonar">
+
+      <div class="simulation-value">
+        {{ simulatedSonar | number:'1.0-2' }} %
+      </div>
+
+    </div>
+
+  </div>
+
+<div class="go-advisor">
+
+  <div class="advisor-title">
+
+    <div>
+      <div class="eyebrow">
+        SMART RELEASE ADVISOR
+      </div>
+
+      <h3>How to Reach GO?</h3>
+    </div>
+
+    <div class="target-badge">
+      Target QIS: 80
+    </div>
+
+  </div>
+
+
+  <div
+    class="already-go"
+    *ngIf="currentQis >= targetQis">
+
+    ✓ Current project quality already meets
+    the GO threshold.
+
+  </div>
+
+
+  <ng-container
+    *ngIf="currentQis < targetQis">
+
+    <div class="advisor-summary">
+
+      <div>
+        <span>Current QIS</span>
+        <strong>
+          {{ currentQis | number:'1.2-2' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Target</span>
+        <strong>
+          {{ targetQis | number:'1.2-2' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Gap</span>
+        <strong>
+          +{{ gapToGo | number:'1.2-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+
+    <div
+      class="recommendation-card"
+      *ngIf="recommendation as rec">
+
+      <div class="recommendation-label">
+        RECOMMENDED LEVER
+      </div>
+
+      <h3>
+        {{ rec.metric }}
+      </h3>
+
+      <div class="recommendation-values">
+
+        <div>
+          <span>Current</span>
+
+          <strong>
+            {{
+              rec.currentValue
+                | number:'1.0-2'
+            }} %
+          </strong>
+        </div>
+
+        <div class="recommendation-arrow">
+          →
+        </div>
+
+        <div>
+          <span>Recommended</span>
+
+          <strong>
+            {{
+              rec.targetValue
+                | number:'1.0-2'
+            }} %
+          </strong>
+        </div>
+
+      </div>
+
+
+      <p>
+        Improving
+        <strong>{{ rec.metric }}</strong>
+        by approximately
+
+        <strong>
+          +{{ rec.improvement | number:'1.0-2' }} points
+        </strong>
+
+        is the smallest single-dimension
+        improvement capable of reaching
+        the GO threshold.
+      </p>
+
+
+      <button
+        type="button"
+        class="apply-scenario"
+        (click)="applyRecommendation()">
+
+        Apply to Simulation
+
+      </button>
+
+    </div>
+
+
+    <div
+      class="no-solution"
+      *ngIf="!recommendation">
+
+      No single quality dimension can reach
+      the GO threshold alone.
+
+      A combined improvement scenario is required.
+
+    </div>
+
+  </ng-container>
+
+</div>
+
+
+
+
+  <div class="simulation-footer">
+
+    Simulation only — project data and QIS configuration
+    are not modified.
+
+  </div>
+
+</div>

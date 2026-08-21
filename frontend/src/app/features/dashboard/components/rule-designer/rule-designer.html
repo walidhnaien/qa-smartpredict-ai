@@ -1,0 +1,128 @@
+<div class="rule-designer">
+
+  <div class="header">
+
+    <div>
+
+      <div class="eyebrow">
+        QIS ENGINE CONFIGURATION
+      </div>
+
+      <h2>Quality Rule Designer</h2>
+
+      <p>
+        Configure the relative importance of each
+        quality dimension used by SmartPredict.
+      </p>
+
+    </div>
+
+    <div class="total-box">
+
+      <span>
+        Total coefficients
+      </span>
+
+      <strong>
+        {{ getTotalWeight() }}
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <div class="explanation">
+
+    Coefficients do not need to total 100.
+    SmartPredict automatically normalizes them
+    before calculating the Quality Intelligence Score.
+
+  </div>
+
+
+  <div
+    class="rule"
+    *ngFor="let rule of rules">
+
+    <div class="rule-header">
+
+      <div>
+
+        <strong>
+          {{ rule.ruleName }}
+        </strong>
+
+        <span class="enabled">
+          {{ rule.enabled ? 'ACTIVE' : 'DISABLED' }}
+        </span>
+
+      </div>
+
+      <div class="normalized">
+
+        Effective weight
+
+        <strong>
+          {{
+            getNormalizedWeight(rule)
+              | number:'1.0-2'
+          }} %
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <div class="rule-control">
+
+      <input
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        [(ngModel)]="rule.weight">
+
+      <div class="coefficient">
+
+        <span>Coefficient</span>
+
+        <strong>
+          {{ rule.weight }}
+        </strong>
+
+      </div>
+
+      <button
+        type="button"
+        (click)="apply(rule)">
+
+        Apply
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="designer-footer">
+
+    <div>
+      Changes affect the QIS calculation and
+      release decision.
+    </div>
+
+    <button
+      class="recalculate"
+      type="button"
+      (click)="refresh.emit()">
+
+      Recalculate QIS
+
+    </button>
+
+  </div>
+
+</div>

@@ -90,6 +90,25 @@ public class QualityIntelligenceService {
         dto.setQualityIntelligenceScore(
                 Math.round(finalScore * 100.0) / 100.0);
 
+                dto.setTotalRequirements(
+        coverage.getTotalRequirements());
+
+dto.setCoveredRequirements(
+        coverage.getCoveredRequirements());
+
+dto.setUncoveredRequirements(
+        coverage.getTotalRequirements()
+        - coverage.getCoveredRequirements());
+
+dto.setTotalStories(
+        defect.getTotalStories());
+
+dto.setTotalBugs(
+        defect.getTotalBugs());
+
+dto.setBugRatio(
+        defect.getBugRatio());
+
         return dto;
     }
 }

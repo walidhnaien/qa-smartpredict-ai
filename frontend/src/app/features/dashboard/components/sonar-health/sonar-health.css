@@ -1,0 +1,144 @@
+.sonar-health-card {
+  height: 100%;
+  box-sizing: border-box;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.07);
+}
+
+.sonar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  color: #64748b;
+}
+
+.sonar-header h2 {
+  margin: 6px 0 0;
+}
+
+.health-badge {
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.health-badge.healthy {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.health-badge.attention {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.health-badge.critical {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.sonar-score-section {
+  margin-top: 25px;
+  text-align: center;
+}
+
+.sonar-score {
+  display: inline-block;
+  font-size: 48px;
+  font-weight: 700;
+}
+
+.score-unit {
+  display: inline-block;
+  margin-left: 5px;
+  color: #64748b;
+}
+
+.score-label {
+  margin-top: 3px;
+  color: #64748b;
+}
+
+.sonar-progress {
+  height: 8px;
+  margin: 18px 0 25px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.sonar-progress-value {
+  height: 100%;
+  background: #2563eb;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.metric {
+  position: relative;
+  padding: 18px 10px;
+  text-align: center;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.metric-label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.metric strong {
+  font-size: 20px;
+}
+
+.rating {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sonar-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+
+  margin-top: 20px;
+  padding-top: 18px;
+
+  border-top: 1px solid #e2e8f0;
+
+  color: #64748b;
+  font-size: 13px;
+}
+
+.sonar-footer strong {
+  margin-left: 5px;
+  color: #0f172a;
+}
+
+@media (max-width: 800px) {
+
+  .metrics-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .sonar-footer {
+    flex-direction: column;
+  }
+}
