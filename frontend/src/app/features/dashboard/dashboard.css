@@ -451,3 +451,30 @@ app-what-if-simulator {
   width: 100%;
   margin-top: 24px;
 }
+.dashboard-actions {
+  max-width: 1400px;
+  margin: 20px auto 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.export-pdf-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 11px 20px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  background: #1f2937;
+  color: white;
+
+  transition: 0.2s ease;
+}
+
+.export-pdf-btn:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}

@@ -12,18 +12,30 @@ public class AiGeneratedRecommendationService {
     private final AiPromptBuilderService aiPromptBuilderService;
     private final OpenAiClientService openAiClientService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper =
+            new ObjectMapper();
 
     public AiRecommendationDto generateStructuredRecommendation() {
+
         try {
-            String prompt = aiPromptBuilderService.buildPrompt();
 
-            String json = openAiClientService.generate(prompt);
+            String prompt =
+                    aiPromptBuilderService.buildPrompt();
 
-            return objectMapper.readValue(json, AiRecommendationDto.class);
+            String json =
+                    openAiClientService.generate(prompt);
+
+            return objectMapper.readValue(
+                    json,
+                    AiRecommendationDto.class
+            );
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to parse OpenAI response", e);
+
+            throw new RuntimeException(
+                    "Failed to parse AI response",
+                    e
+            );
         }
     }
 }

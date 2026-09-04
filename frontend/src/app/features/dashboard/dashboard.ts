@@ -20,6 +20,8 @@ import { WhatIfSimulator }   from './components/what-if-simulator/what-if-simula
 import { AiIntelligenceService }  from '../../core/services/ai-intelligence.service';
 import { AiIntelligenceResponse }  from '../../core/models/ai-intelligence.model';
 import { AiQualityAdvisor }  from './components/ai-quality-advisor/ai-quality-advisor';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-dashboard',
@@ -417,7 +419,93 @@ loadAiIntelligence(): void {
 }
 
 
+exportPdf(): void {
 
+  const dashboard =
+    document.getElementById('quality-report');
+
+  if (!dashboard) {
+    console.error('Quality report not found');
+    return;
+  }
+
+  html2canvas(dashboard, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: '#ffffff'
+  }).then(canvas => {
+
+    const imageData =
+      canvas.toDataURL('image/png');
+
+    const pdf =
+      new jsPDF(
+        'p',
+        'mm',
+        'a4'
+      );
+
+    const pdfWidth =
+      pdf.internal.pageSize.getWidth();
+
+    const pdfHeight =
+      pdf.internal.pageSize.getHeight();
+
+    const margin = 10;
+
+    const availableWidth =
+      pdfWidth - (margin * 2);
+
+    const imageHeight =
+      (canvas.height * availableWidth)
+      / canvas.width;
+
+    let heightLeft = imageHeight;
+
+    let position = margin;
+
+    pdf.addImage(
+      imageData,
+      'PNG',
+      margin,
+      position,
+      availableWidth,
+      imageHeight
+    );
+
+    heightLeft -=
+      pdfHeight - (margin * 2);
+
+    while (heightLeft > 0) {
+
+      position =
+        heightLeft - imageHeight + margin;
+
+      pdf.addPage();
+
+      pdf.addImage(
+        imageData,
+        'PNG',
+        margin,
+        position,
+        availableWidth,
+        imageHeight
+      );
+
+      heightLeft -=
+        pdfHeight - (margin * 2);
+    }
+
+    const date =
+      new Date()
+        .toISOString()
+        .slice(0, 10);
+
+    pdf.save(
+      `QA-SmartPredict-Quality-Report-${date}.pdf`
+    );
+  });
+}
 
 
 

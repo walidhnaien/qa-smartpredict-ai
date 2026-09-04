@@ -216,6 +216,7 @@ public class AiIntelligenceService {
                 );
 
         
+                
 		
 AiGenerativeAnalysisDto aiAnalysis;
 
