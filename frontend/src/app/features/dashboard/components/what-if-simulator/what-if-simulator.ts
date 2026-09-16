@@ -27,6 +27,7 @@ export class WhatIfSimulator implements OnChanges {
   @Input() defect = 0;
   @Input() feedback = 0;
   @Input() incident = 0;
+  @Input() rca = 0;
   @Input() sonar = 0;
 
   // Poids QIS finaux
@@ -34,6 +35,7 @@ export class WhatIfSimulator implements OnChanges {
   @Input() defectWeight = 0;
   @Input() feedbackWeight = 0;
   @Input() incidentWeight = 0;
+  @Input() rcaWeight = 0;
   @Input() sonarWeight = 20;
 
   // Valeurs de simulation
@@ -41,6 +43,7 @@ export class WhatIfSimulator implements OnChanges {
   simulatedDefect = 0;
   simulatedFeedback = 0;
   simulatedIncident = 0;
+  simulatedRca = 0;
   simulatedSonar = 0;
 
 
@@ -56,25 +59,28 @@ export class WhatIfSimulator implements OnChanges {
     this.simulatedDefect = this.defect;
     this.simulatedFeedback = this.feedback;
     this.simulatedIncident = this.incident;
+	this.simulatedRca = this.rca;
     this.simulatedSonar = this.sonar;
   }
 
 
-  get simulatedQis(): number {
+get simulatedQis(): number {
 
-    const score =
-      (this.simulatedCoverage * this.coverageWeight / 100)
-      +
-      (this.simulatedDefect * this.defectWeight / 100)
-      +
-      (this.simulatedFeedback * this.feedbackWeight / 100)
-      +
-      (this.simulatedIncident * this.incidentWeight / 100)
-      +
-      (this.simulatedSonar * this.sonarWeight / 100);
+  const score =
+    (this.simulatedCoverage * this.coverageWeight / 100)
+    +
+    (this.simulatedDefect * this.defectWeight / 100)
+    +
+    (this.simulatedFeedback * this.feedbackWeight / 100)
+    +
+    (this.simulatedIncident * this.incidentWeight / 100)
+    +
+    (this.simulatedRca * this.rcaWeight / 100)
+    +
+    (this.simulatedSonar * this.sonarWeight / 100);
 
-    return Math.round(score * 100) / 100;
-  }
+  return Math.round(score * 100) / 100;
+}
 
 
 get difference(): number {
@@ -165,6 +171,11 @@ get recommendation(): {
       value: this.incident,
       weight: this.incidentWeight
     },
+	{
+  metric: 'RCA',
+  value: this.rca,
+  weight: this.rcaWeight
+},
     {
       metric: 'Sonar Quality',
       value: this.sonar,
@@ -245,6 +256,10 @@ applyRecommendation(): void {
       this.simulatedFeedback =
         rec.targetValue;
       break;
+	  case 'RCA':
+  this.simulatedRca =
+    rec.targetValue;
+  break;
 
     case 'Incident':
       this.simulatedIncident =

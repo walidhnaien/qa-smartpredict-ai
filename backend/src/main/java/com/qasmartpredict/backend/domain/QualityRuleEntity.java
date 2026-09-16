@@ -2,8 +2,8 @@ package com.qasmartpredict.backend.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
- import java.math.BigDecimal;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -16,6 +16,7 @@ import java.util.UUID;
 public class QualityRuleEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "rule_name", nullable = false)

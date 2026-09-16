@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-
 import { HttpClient } from '@angular/common/http';
-
 import { Observable } from 'rxjs';
 
 import { QisSonar } from '../models/qis-sonar.model';
@@ -19,18 +17,11 @@ export class SonarService {
   ) {}
 
   getQisWithSonar(
-    projectId: number,
-    currentQis: number
+    projectId: number
   ): Observable<QisSonar> {
 
     return this.http.get<QisSonar>(
-      `${this.apiUrl}/qis/${projectId}`,
-      {
-        params: {
-          currentQis: currentQis
-        }
-      }
+      `${this.apiUrl}/qis/${projectId}`
     );
   }
-
 }

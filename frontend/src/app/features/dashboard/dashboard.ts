@@ -174,28 +174,22 @@ refreshDashboard(): void {
 
 loadSonarQis(): void {
 
-  if (!this.score) {
-    return;
-  }
-
   const projectId = 1;
 
-  const currentQis =
-    this.score.qualityIntelligenceScore;
-
   this.sonarService
-    .getQisWithSonar(
-      projectId,
-      currentQis
-    )
+    .getQisWithSonar(projectId)
     .subscribe({
 
       next: (data) => {
 
-        console.log('SONAR QIS DATA:', data);
+        console.log(
+          'SONAR QIS DYNAMIQUE:',
+          data
+        );
 
         this.qisSonar = data;
-		this.loadAiIntelligence();
+
+        this.loadAiIntelligence();
 
         this.cdr.detectChanges();
       },

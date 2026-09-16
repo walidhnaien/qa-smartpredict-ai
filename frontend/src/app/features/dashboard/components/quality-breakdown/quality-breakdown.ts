@@ -24,13 +24,14 @@ Chart.register(...registerables);
 export class QualityBreakdown
   implements AfterViewInit, OnChanges, OnDestroy {
 
-  @Input() coverageContribution = 0;
-  @Input() defectContribution = 0;
-  @Input() feedbackContribution = 0;
-  @Input() incidentContribution = 0;
-  @Input() sonarContribution = 0;
+@Input() coverageContribution = 0;
+@Input() defectContribution = 0;
+@Input() feedbackContribution = 0;
+@Input() incidentContribution = 0;
+@Input() rcaContribution = 0;
+@Input() sonarContribution = 0;
 
-  @Input() finalQis = 0;
+@Input() finalQis = 0;
 
   @ViewChild('breakdownChart')
   chartCanvas!: ElementRef<HTMLCanvasElement>;
@@ -74,6 +75,7 @@ export class QualityBreakdown
           'Defect',
           'Feedback',
           'Incident',
+		  'RCA',
           'Sonar'
         ],
 
@@ -83,6 +85,7 @@ export class QualityBreakdown
             this.defectContribution,
             this.feedbackContribution,
             this.incidentContribution,
+			this.rcaContribution,
             this.sonarContribution
           ],
 

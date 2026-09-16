@@ -175,6 +175,42 @@
 
     </div>
 
+<!-- RCA -->
+
+<app-quality-kpi-card
+  title="RCA Quality"
+
+  [score]="score.rcaScore"
+
+  [weight]="getNormalizedWeight('RCA')"
+
+  [contribution]="
+    getContribution(
+      score.rcaScore,
+      'RCA'
+    )
+  "
+
+  status="ACCEPTABLE"
+
+  [details]="[
+    {
+      label: 'Incidents with RCA',
+      value: score.incidentsWithRca
+    },
+    {
+      label: 'RCA Coverage',
+      value:
+        (score.rcaCoverage | number:'1.0-2') + ' %'
+    },
+    {
+      label: 'Closure Rate',
+      value:
+        (score.closureRate | number:'1.0-2') + ' %'
+    }
+  ]">
+
+</app-quality-kpi-card>
 
     <!-- ======================================================= -->
     <!-- SONAR HEALTH + QUALITY BREAKDOWN -->
@@ -222,6 +258,13 @@
             'incident'
           )
         "
+		
+		[rcaContribution]="
+  getContribution(
+    score.rcaScore,
+    'RCA'
+  )
+"
 
         [sonarContribution]="
           qisSonar.sonarContribution
@@ -304,6 +347,10 @@
         [incident]="
           score.incidentScore
         "
+		
+		[rca]="
+  score.rcaScore
+"
 
         [sonar]="
           qisSonar.sonarScore ?? 0
@@ -324,6 +371,9 @@
         [incidentWeight]="
           getNormalizedWeight('incident')
         "
+		 [rcaWeight]="
+    getNormalizedWeight('RCA')
+  "
 
         [sonarWeight]="20">
 
