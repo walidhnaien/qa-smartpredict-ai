@@ -24,4 +24,43 @@ export class SonarService {
       `${this.apiUrl}/qis/${projectId}`
     );
   }
+  
+  
+  
+  
+  
+  getQisWithSonarByRelease(
+  releaseId: string,
+  projectId: number = 1
+): Observable<QisSonar> {
+
+  return this.http.get<QisSonar>(
+    `${this.apiUrl}/qis/release/${releaseId}`,
+    {
+      params: {
+        projectId: projectId.toString()
+      }
+    }
+  );
+}
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 }

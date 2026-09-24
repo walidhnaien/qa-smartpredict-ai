@@ -174,22 +174,27 @@ public class RcaImportService {
          */
         rcaRepository.deleteAll();
 
-        /*
-         * Enregistrement du nouveau snapshot.
-         */
-        List<RcaEntity> entities =
-                new ArrayList<>(
-                        uniqueRcas.values()
-                );
+/*
+ * IMPORTANT :
+ * Force l'exécution immédiate des DELETE en base
+ * avant les nouveaux INSERT.
+ *
+ * Sinon Hibernate peut essayer d'insérer les nouveaux RCA
+ * avant d'avoir réellement supprimé les anciens.
+ */
+rcaRepository.flush();
 
-        rcaRepository.saveAll(entities);
+List<RcaEntity> entities =
+        new ArrayList<>(
+                uniqueRcas.values()
+        );
 
-        /*
-         * Force l'envoi SQL avant de retourner SUCCESS.
-         * Cela permet de détecter immédiatement une éventuelle
-         * erreur de contrainte.
-         */
-        rcaRepository.flush();
+rcaRepository.saveAll(entities);
+
+/*
+ * Force également les INSERT avant de retourner SUCCESS.
+ */
+rcaRepository.flush();
 
         System.out.println(
                 "=========================================="

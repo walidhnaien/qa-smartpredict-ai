@@ -2,7 +2,7 @@ package com.qasmartpredict.backend.dto;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import java.util.UUID;
 import java.time.LocalDateTime;
 
 @Entity
@@ -21,7 +21,8 @@ public class SonarMetric {
     @Column(nullable = false)
     private Long projectId;
 
-    private Long releaseId;
+   @Column(name = "release_id")
+   private UUID releaseId;
 
     @Column(nullable = false)
     private String projectKey;

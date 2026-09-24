@@ -54,16 +54,44 @@ public class IncidentService {
                 .toList();
     }
 
-    public IncidentSummaryDto calculate() {
+/**
+ * Calcul historique global.
+ * Conservé temporairement pour compatibilité.
+ */
+public IncidentSummaryDto calculate() {
 
-        /*
-         * 1. Tous les bugs Jira
-         */
-        List<UserStoryEntity> bugs =
-                userStoryRepository.findAll()
-                        .stream()
-                        .filter(this::isBug)
-                        .toList();
+    List<UserStoryEntity> issues =
+            userStoryRepository.findAll();
+
+    return calculateFromIssues(issues);
+}
+
+
+/**
+ * Nouveau calcul limité à une Release.
+ */
+public IncidentSummaryDto calculate(UUID releaseId) {
+
+    List<UserStoryEntity> issues =
+            userStoryRepository.findDistinctByReleases_Id(releaseId);
+
+    return calculateFromIssues(issues);
+}
+
+
+/**
+ * Moteur commun de calcul Incident / Feedback.
+ */
+private IncidentSummaryDto calculateFromIssues(
+        List<UserStoryEntity> issues) {
+
+    /*
+     * 1. Tous les bugs Jira
+     */
+    List<UserStoryEntity> bugs =
+            issues.stream()
+                    .filter(this::isBug)
+                    .toList();
 
         /*
          * 2. Incidents clients :

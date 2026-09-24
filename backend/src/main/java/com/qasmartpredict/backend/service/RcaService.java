@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,29 +32,82 @@ public class RcaService {
     }
 
     /**
-     * Calcule les indicateurs RCA pour les incidents clients.
+     * ==========================================================
+     * CALCUL RCA GLOBAL
+     * ==========================================================
+     *
+     * Conserve le fonctionnement historique.
+     *
+     * Tous les tickets Jira sont pris en compte.
      */
     public RcaSummaryDto calculate() {
 
+        List<UserStoryEntity> issues =
+                userStoryRepository.findAll();
+
+        return calculateFromIssues(issues);
+    }
+
+    /**
+     * ==========================================================
+     * CALCUL RCA PAR RELEASE
+     * ==========================================================
+     *
+     * Seuls les tickets appartenant à la Release sélectionnée
+     * sont pris en compte.
+     */
+    public RcaSummaryDto calculate(UUID releaseId) {
+
+        if (releaseId == null) {
+            throw new IllegalArgumentException(
+                    "releaseId ne peut pas être null"
+            );
+        }
+
+        List<UserStoryEntity> issues =
+                userStoryRepository
+                        .findDistinctByReleases_Id(releaseId);
+
+        return calculateFromIssues(issues);
+    }
+
+    /**
+     * ==========================================================
+     * MOTEUR COMMUN DU CALCUL RCA
+     * ==========================================================
+     *
+     * Cette méthode peut recevoir :
+     *
+     * - tous les tickets Jira
+     * - ou uniquement les tickets d'une Release
+     */
+    private RcaSummaryDto calculateFromIssues(
+            List<UserStoryEntity> issues) {
+
         /*
          * ==========================================================
-         * 1. Récupération des incidents clients depuis Jira
+         * 1. Récupération des incidents clients
          * ==========================================================
+         *
+         * On garde uniquement :
+         *
+         * - Issue Type = Bug
+         * - Bug identifié comme incident client
+         *
+         * Exemple :
+         * Summary contenant "Barclays"
          */
-
         List<UserStoryEntity> incidents =
-                userStoryRepository.findAll()
-                        .stream()
+                issues.stream()
                         .filter(this::isBug)
                         .filter(incidentService::isClientIncident)
                         .toList();
 
         /*
          * ==========================================================
-         * 2. Construction de la liste des Jira IDs incidents
+         * 2. Construction des Jira IDs des incidents
          * ==========================================================
          */
-
         Set<String> incidentJiraKeys =
                 incidents.stream()
                         .map(UserStoryEntity::getJiraKey)
@@ -67,28 +121,29 @@ public class RcaService {
          * 3. Lecture des RCA
          * ==========================================================
          */
-
         List<RcaEntity> allRcas =
                 rcaRepository.findAll();
 
         /*
          * ==========================================================
-         * 4. Matching :
+         * 4. Matching Jira incident <-> RCA
+         * ==========================================================
          *
-         * Jira incident :
+         * Exemple :
+         *
+         * Jira :
          * FISCDSOL-15265
          *
          * RCA :
          * FISCDSOL-15265
          *
-         * La normalisation permet d'éviter les problèmes :
+         * Le Jira ID est normalisé afin d'éviter les problèmes :
+         *
          * - espaces
          * - minuscules / majuscules
          * - BOM UTF-8
          * - espaces insécables
-         * ==========================================================
          */
-
         List<RcaEntity> matchedRcas =
                 allRcas.stream()
                         .filter(Objects::nonNull)
@@ -107,7 +162,6 @@ public class RcaService {
          * 5. Statuts RCA
          * ==========================================================
          */
-
         long done =
                 matchedRcas.stream()
                         .filter(rca ->
@@ -140,10 +194,9 @@ public class RcaService {
 
         /*
          * ==========================================================
-         * 6. Présence d'actions correctives
+         * 6. Actions correctives
          * ==========================================================
          */
-
         long correctiveActions =
                 matchedRcas.stream()
                         .filter(rca ->
@@ -155,10 +208,9 @@ public class RcaService {
 
         /*
          * ==========================================================
-         * 7. Présence d'actions préventives
+         * 7. Actions préventives
          * ==========================================================
          */
-
         long preventiveActions =
                 matchedRcas.stream()
                         .filter(rca ->
@@ -171,13 +223,12 @@ public class RcaService {
         /*
          * ==========================================================
          * 8. RCA Coverage
-         *
-         * Exemple :
-         * 5 RCA / 6 incidents
-         * = 83.33 %
          * ==========================================================
+         *
+         * RCA trouvés
+         * ---------------- x 100
+         * Incidents clients
          */
-
         double rcaCoverage =
                 percentage(
                         matchedRcas.size(),
@@ -187,13 +238,12 @@ public class RcaService {
         /*
          * ==========================================================
          * 9. Corrective Action Coverage
-         *
-         * RCA contenant une action corrective
-         * /
-         * RCA correspondant aux incidents
          * ==========================================================
+         *
+         * RCA avec action corrective
+         * --------------------------- x 100
+         * RCA trouvés
          */
-
         double correctiveActionCoverage =
                 percentage(
                         correctiveActions,
@@ -205,7 +255,6 @@ public class RcaService {
          * 10. Preventive Action Coverage
          * ==========================================================
          */
-
         double preventiveActionCoverage =
                 percentage(
                         preventiveActions,
@@ -215,13 +264,12 @@ public class RcaService {
         /*
          * ==========================================================
          * 11. Closure Rate
-         *
-         * RCA Done
-         * /
-         * RCA correspondant aux incidents
          * ==========================================================
+         *
+         * RCA DONE
+         * --------- x 100
+         * RCA trouvés
          */
-
         double closureRate =
                 percentage(
                         done,
@@ -230,19 +278,16 @@ public class RcaService {
 
         /*
          * ==========================================================
-         * 12. RCA Score
-         *
-         * Proposition actuelle :
-         *
-         * RCA Coverage                 30 %
-         * Corrective Action Coverage   25 %
-         * Preventive Action Coverage   25 %
-         * Closure Rate                 20 %
-         *
-         * Total = 100 %
+         * 12. RCA SCORE
          * ==========================================================
+         *
+         * RCA Coverage                = 30 %
+         * Corrective Action Coverage  = 25 %
+         * Preventive Action Coverage  = 25 %
+         * Closure Rate                = 20 %
+         *
+         * TOTAL = 100 %
          */
-
         double rcaScore =
                 (rcaCoverage * 0.30)
                         + (correctiveActionCoverage * 0.25)
@@ -251,12 +296,9 @@ public class RcaService {
 
         /*
          * ==========================================================
-         * 13. DEBUG CONSOLE
-         *
-         * Très utile actuellement pour vérifier le matching.
+         * 13. DEBUG
          * ==========================================================
          */
-
         System.out.println(
                 "=========================================="
         );
@@ -267,6 +309,11 @@ public class RcaService {
 
         System.out.println(
                 "=========================================="
+        );
+
+        System.out.println(
+                "Issues analysed = "
+                        + issues.size()
         );
 
         System.out.println(
@@ -287,10 +334,10 @@ public class RcaService {
         System.out.println(
                 "RCA Jira IDs = "
                         + allRcas.stream()
-                                .map(RcaEntity::getJiraId)
-                                .filter(Objects::nonNull)
-                                .map(this::normalizeJiraId)
-                                .toList()
+                        .map(RcaEntity::getJiraId)
+                        .filter(Objects::nonNull)
+                        .map(this::normalizeJiraId)
+                        .toList()
         );
 
         System.out.println(
@@ -301,9 +348,10 @@ public class RcaService {
         System.out.println(
                 "Matched Jira IDs = "
                         + matchedRcas.stream()
-                                .map(RcaEntity::getJiraId)
-                                .map(this::normalizeJiraId)
-                                .toList()
+                        .map(RcaEntity::getJiraId)
+                        .filter(Objects::nonNull)
+                        .map(this::normalizeJiraId)
+                        .toList()
         );
 
         System.out.println(
@@ -335,6 +383,18 @@ public class RcaService {
         );
 
         System.out.println(
+                "Corrective Action Coverage = "
+                        + round(correctiveActionCoverage)
+                        + "%"
+        );
+
+        System.out.println(
+                "Preventive Action Coverage = "
+                        + round(preventiveActionCoverage)
+                        + "%"
+        );
+
+        System.out.println(
                 "Closure Rate = "
                         + round(closureRate)
                         + "%"
@@ -354,7 +414,6 @@ public class RcaService {
          * 14. Construction du résultat API
          * ==========================================================
          */
-
         return new RcaSummaryDto(
                 incidents.size(),
                 matchedRcas.size(),
@@ -407,24 +466,9 @@ public class RcaService {
         }
 
         return value
-                /*
-                 * Supprime un éventuel BOM UTF-8
-                 */
                 .replace("\uFEFF", "")
-
-                /*
-                 * Remplace les espaces insécables
-                 */
                 .replace("\u00A0", " ")
-
-                /*
-                 * Supprime espaces début / fin
-                 */
                 .trim()
-
-                /*
-                 * Uniformise la casse
-                 */
                 .toUpperCase(
                         Locale.ROOT
                 );
@@ -453,7 +497,7 @@ public class RcaService {
     }
 
     /**
-     * Vérifie qu'une action est renseignée.
+     * Vérifie qu'une valeur est renseignée.
      */
     private boolean hasValue(
             String value) {

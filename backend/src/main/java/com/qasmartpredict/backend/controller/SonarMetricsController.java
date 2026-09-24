@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.UUID;
 import java.util.List;
 
 @RestController
@@ -134,33 +134,46 @@ public class SonarMetricsController {
      */
 
     @PostMapping("/import-static")
-    public ResponseEntity<SonarMetric> importStatic(
-            @RequestParam Long projectId,
-            @RequestParam Long releaseId) {
+public ResponseEntity<SonarMetric> importStatic(
+        @RequestParam Long projectId,
+        @RequestParam UUID releaseId) {
 
-        try {
+    try {
 
-            SonarMetric sonarMetric =
-                    sonarImportService
-                            .importStaticSonarResult(
-                                    projectId,
-                                    releaseId
-                            );
+        SonarMetric sonarMetric =
+                sonarImportService
+                        .importStaticSonarResult(
+                                projectId,
+                                releaseId
+                        );
 
-            return ResponseEntity.ok(
-                    sonarMetric
-            );
+        return ResponseEntity.ok(sonarMetric);
 
-        } catch (Exception e) {
+    } catch (Exception e) {
 
-            e.printStackTrace();
+        e.printStackTrace();
 
-            return ResponseEntity
-                    .internalServerError()
-                    .build();
-        }
+        return ResponseEntity
+                .internalServerError()
+                .build();
     }
+}
 
+
+
+@GetMapping("/release/{releaseId}/latest")
+public ResponseEntity<SonarMetric> latestForRelease(
+        @PathVariable UUID releaseId) {
+
+    return repository
+            .findTopByReleaseIdOrderByAnalysisDateDesc(releaseId)
+            .map(ResponseEntity::ok)
+            .orElse(
+                    ResponseEntity
+                            .notFound()
+                            .build()
+            );
+}
 
     /*
      * ==========================================================
@@ -205,4 +218,28 @@ public class SonarMetricsController {
                 result
         );
     }
+	
+	
+	@GetMapping("/qis/release/{releaseId}")
+public ResponseEntity<QisSonarResponse> calculateQisForRelease(
+        @PathVariable UUID releaseId,
+        @RequestParam(defaultValue = "1") Long projectId) {
+
+    QisSonarResponse result =
+            qisSonarIntegrationService
+                    .calculateFinalQisByRelease(
+                            projectId,
+                            releaseId
+                    );
+
+    return ResponseEntity.ok(result);
+}
+	
+	
+	
+	
+	
+	
+	
+	
 }

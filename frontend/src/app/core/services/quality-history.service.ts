@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-
 import { HttpClient } from '@angular/common/http';
-
 import { Observable } from 'rxjs';
 
 import { QualitySnapshot }
@@ -12,7 +10,7 @@ import { QualitySnapshot }
 })
 export class QualityHistoryService {
 
-  private apiUrl =
+  private readonly apiUrl =
     'http://localhost:8081/api/quality';
 
   constructor(
@@ -26,4 +24,16 @@ export class QualityHistoryService {
       `${this.apiUrl}/history`
     );
   }
+
+getHistoryByRelease(
+  releaseId: string
+): Observable<QualitySnapshot[]> {
+
+  return this.http.get<QualitySnapshot[]>(
+    `http://localhost:8081/api/quality/history/release/${releaseId}`
+  );
+}
+
+
+
 }

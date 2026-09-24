@@ -42,4 +42,27 @@ public class RequirementEntity {
     @JoinTable(name = "requirement_user_story",joinColumns = @JoinColumn(name = "requirement_id"),inverseJoinColumns = @JoinColumn(name = "user_story_id"))
     private Set<UserStoryEntity> userStories = new HashSet<>();
 	
+	@ManyToMany
+@JoinTable(
+    name = "release_requirement",
+    joinColumns = @JoinColumn(name = "requirement_id"),
+    inverseJoinColumns = @JoinColumn(name = "release_id")
+)
+private Set<ReleaseEntity> releases = new HashSet<>();
+
+public Set<ReleaseEntity> getReleases() {
+    return releases;
+}
+
+public void setReleases(Set<ReleaseEntity> releases) {
+    this.releases = releases;
+}
+
+
+
+
+
+
+
+	
 }

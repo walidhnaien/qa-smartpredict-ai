@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-
+import java.util.UUID;
 import java.io.IOException;
 
 @Service
@@ -23,7 +23,7 @@ public class SonarImportService {
 
     public SonarMetric importStaticSonarResult(
             Long projectId,
-            Long releaseId) throws IOException {
+            UUID releaseId) throws IOException {
 
         // Lecture du fichier simulant le résultat Jenkins/Sonar
         ClassPathResource resource =

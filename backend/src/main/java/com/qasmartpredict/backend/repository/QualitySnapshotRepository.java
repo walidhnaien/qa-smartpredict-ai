@@ -9,6 +9,11 @@ import java.util.UUID;
 public interface QualitySnapshotRepository
         extends JpaRepository<QualitySnapshotEntity, UUID> {
 
+    // Ancien historique global
     List<QualitySnapshotEntity>
         findTop20ByOrderByAnalysisDateDesc();
+
+    // Historique d'une Release
+    List<QualitySnapshotEntity>
+        findTop20ByReleaseIdOrderByAnalysisDateDesc(UUID releaseId);
 }

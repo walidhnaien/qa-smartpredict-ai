@@ -4,6 +4,7 @@ import com.qasmartpredict.backend.dto.SonarMetric;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface SonarMetricRepository
         extends JpaRepository<SonarMetric, Long> {
@@ -12,5 +13,5 @@ public interface SonarMetricRepository
             findTopByProjectIdOrderByAnalysisDateDesc(Long projectId);
 
     Optional<SonarMetric>
-            findTopByReleaseIdOrderByAnalysisDateDesc(Long releaseId);
+            findTopByReleaseIdOrderByAnalysisDateDesc(UUID releaseId);
 }

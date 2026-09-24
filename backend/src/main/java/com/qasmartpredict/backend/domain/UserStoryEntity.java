@@ -39,6 +39,9 @@ public class UserStoryEntity {
 	
 	@Column(name = "issue_type")
 	private String issueType;
+	
+	@Column(name = "epic_key")
+     private String epicKey;
 
 	private String reporter;
 
@@ -54,4 +57,21 @@ public class UserStoryEntity {
 	
 	@ManyToMany(mappedBy = "userStories")
     private Set<RequirementEntity> requirements = new HashSet<>();
+	
+	@ManyToMany
+@JoinTable(
+        name = "user_story_release",
+        joinColumns = @JoinColumn(name = "user_story_id"),
+        inverseJoinColumns = @JoinColumn(name = "release_id")
+)
+private Set<ReleaseEntity> releases = new HashSet<>();
+	
+    public Set<ReleaseEntity> getReleases() {
+        return releases;
+    }
+
+    public void setReleases(Set<ReleaseEntity> releases) {
+        this.releases = releases;
+    }
+	
 }

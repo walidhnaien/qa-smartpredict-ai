@@ -16,6 +16,97 @@
 >
   <h1>QA SmartPredict AI</h1>
 
+
+<div class="release-selector">
+
+  <div class="release-selector-header">
+
+    <div>
+      <span class="release-eyebrow">
+        RELEASE MANAGEMENT
+      </span>
+
+      <h2>
+        Quality Dashboard
+      </h2>
+    </div>
+
+    <div class="release-field">
+	<div
+	  class="analysis-success"
+	  *ngIf="analysisMessage">
+
+	  {{ analysisMessage }}
+
+	</div>
+
+	<div
+	  class="analysis-error"
+	  *ngIf="analysisError">
+
+	  {{ analysisError }}
+
+	</div>
+
+
+      <label for="release">
+        Release
+      </label>
+
+      <select
+        id="release"
+        [(ngModel)]="selectedReleaseId"
+        (ngModelChange)="onReleaseChange()">
+
+        <option
+          *ngFor="let release of releases"
+          [value]="release.id">
+
+          {{ release.version }}
+          —
+          {{ release.name }}
+          —
+          {{ release.type }}
+
+        </option>
+
+      </select>
+	  <button
+  type="button"
+  class="analyze-release-btn"
+  [disabled]="
+    !selectedReleaseId ||
+    analyzingRelease
+  "
+  (click)="analyzeRelease()">
+
+  <span *ngIf="!analyzingRelease">
+    Analyze Release
+  </span>
+
+  <span *ngIf="analyzingRelease">
+    Analyzing...
+  </span>
+
+</button>
+
+    </div>
+
+  </div>
+
+  <div
+    class="release-loading"
+    *ngIf="loadingRelease">
+
+    Loading release quality data...
+
+  </div>
+
+</div>
+
+
+
+
   <!-- ========================================================= -->
   <!-- EXECUTIVE SCORE -->
   <!-- ========================================================= -->
@@ -289,7 +380,9 @@
 
       <div class="timeline-section">
 
-        <app-timeline>
+        <app-timeline
+		 [releaseId]="selectedReleaseId"
+		   [refreshKey]="timelineRefreshKey">
         </app-timeline>
 
       </div>

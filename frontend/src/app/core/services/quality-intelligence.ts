@@ -22,4 +22,20 @@ export class QualityIntelligenceService {
       this.apiUrl
     );
   }
+  
+  
+  getScoreByRelease(
+  releaseId: string
+): Observable<QualityIntelligence> {
+
+  return this.http.get<QualityIntelligence>(
+    `${this.apiUrl}/release/${releaseId}`
+  );
+}
+  
+  
+  
+  
+  
+  
 }

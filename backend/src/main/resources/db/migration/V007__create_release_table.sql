@@ -1,0 +1,9 @@
+ALTER TABLE release
+ADD COLUMN type VARCHAR(30);
+
+UPDATE release
+SET type = 'MAJOR'
+WHERE type IS NULL;
+
+ALTER TABLE release
+ALTER COLUMN type SET NOT NULL;

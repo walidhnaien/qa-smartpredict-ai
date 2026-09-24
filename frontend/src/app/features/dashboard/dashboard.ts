@@ -21,6 +21,8 @@ import { AiIntelligenceService }  from '../../core/services/ai-intelligence.serv
 import { AiIntelligenceResponse }  from '../../core/models/ai-intelligence.model';
 import { AiQualityAdvisor }  from './components/ai-quality-advisor/ai-quality-advisor';
 import html2canvas from 'html2canvas';
+import { Release } from '../../core/models/release.model';
+import { ReleaseService } from '../../core/services/release.service';
 import jsPDF from 'jspdf';
 
 @Component({
@@ -37,6 +39,15 @@ export class Dashboard implements OnInit {
   aiRecommendation: AiRecommendation | null = null;
   rules: QualityRule[] = [];
   ruleMessage = '';
+  releases: Release[] = [];
+selectedReleaseId: string | null = null;
+loadingRelease = false;
+analyzingRelease = false;
+analysisMessage = '';
+analysisError = '';
+timelineRefreshKey = 0;
+
+
 
   constructor(
     private service: QualityIntelligenceService,
@@ -44,6 +55,7 @@ export class Dashboard implements OnInit {
 	 private ruleService: QualityRuleService,
 	 private sonarService: SonarService,
 	 private aiIntelligenceService: AiIntelligenceService,
+	 private releaseService: ReleaseService,
     private cdr: ChangeDetectorRef
   ) {}
   
@@ -68,34 +80,45 @@ export class Dashboard implements OnInit {
 
 
 
-  ngOnInit(): void {
-    this.service.getScore().subscribe({
+ngOnInit(): void {
+
+  /*
+   * Règles de pondération
+   */
+  this.loadRules();
+
+  /*
+   * Chargement des Releases.
+   * loadReleases() sélectionnera ensuite
+   * automatiquement la Release de démo.
+   */
+  this.loadReleases();
+
+  /*
+   * Recommandations historiques/globales.
+   * On les conserve pour le moment.
+   */
+  this.aiService
+    .getRecommendations()
+    .subscribe({
+
       next: (data) => {
-        console.log('QIS DATA:', data);
-        this.score = data;
-		   this.loadSonarQis();
+
+        this.aiRecommendation = data;
+
         this.cdr.detectChanges();
-		this.loadRules();
       },
+
       error: (err) => {
-        console.error('Erreur QIS:', err);
+
+        console.error(
+          'Erreur AI:',
+          err
+        );
       }
+
     });
-	
-			this.aiService.getRecommendations().subscribe({
-		  next: (data) => {
-			console.log('AI DATA:', data);
-			this.aiRecommendation = data;
-			this.cdr.detectChanges();
-		  },
-		  error: (err) => {
-			console.error('Erreur AI:', err);
-		  }
-		});
-			
-	
-	
-  }
+}
   
   loadRules(): void {
   this.ruleService.getRules().subscribe({
@@ -129,46 +152,12 @@ saveRule(rule: QualityRule): void {
 
 refreshDashboard(): void {
 
-  this.service.getScore().subscribe({
+  this.loadRules();
 
-    next: (data) => {
+  if (this.selectedReleaseId) {
+    this.loadSelectedRelease();
+  }
 
-      this.score = data;
-
-      this.loadSonarQis();
-
-      this.cdr.detectChanges();
-    },
-
-    error: (err) => {
-
-      console.error(
-        'Erreur refresh QIS:',
-        err
-      );
-    }
-
-  });
-
-
-  this.aiService.getRecommendations().subscribe({
-
-    next: (data) => {
-
-      this.aiRecommendation = data;
-
-      this.cdr.detectChanges();
-    },
-
-    error: (err) => {
-
-      console.error(
-        'Erreur refresh AI:',
-        err
-      );
-    }
-
-  });
 }
 
 
@@ -204,6 +193,169 @@ loadSonarQis(): void {
 
     });
 }
+
+
+loadSelectedRelease(): void {
+
+  if (!this.selectedReleaseId) {
+    return;
+  }
+
+  const releaseId =
+    this.selectedReleaseId;
+
+  this.loadingRelease = true;
+
+  /*
+   * Reset des anciennes données.
+   */
+  this.score = null;
+  this.qisSonar = null;
+  this.aiIntelligence = null;
+
+  /*
+   * QIS métier de la Release
+   */
+  this.service
+    .getScoreByRelease(releaseId)
+    .subscribe({
+
+      next: (data) => {
+
+        console.log(
+          'RELEASE QUALITY:',
+          data
+        );
+
+        this.score = data;
+
+        /*
+         * Ensuite QIS final + Sonar
+         */
+        this.loadSonarQisByRelease(
+          releaseId
+        );
+
+        this.cdr.detectChanges();
+      },
+
+      error: (err) => {
+
+        this.loadingRelease = false;
+
+        console.error(
+          'Erreur Release Quality:',
+          err
+        );
+      }
+    });
+}
+
+
+loadSonarQisByRelease(
+  releaseId: string
+): void {
+
+  this.sonarService
+    .getQisWithSonarByRelease(
+      releaseId,
+      1
+    )
+    .subscribe({
+
+      next: (data) => {
+
+        console.log(
+          'RELEASE SONAR QIS:',
+          data
+        );
+
+        this.qisSonar = data;
+
+        this.loadingRelease = false;
+
+        /*
+         * L'IA reçoit maintenant les données
+         * de la Release sélectionnée.
+         */
+        this.loadAiIntelligence();
+
+        this.cdr.detectChanges();
+      },
+
+      error: (err) => {
+
+        this.loadingRelease = false;
+
+        console.error(
+          'Erreur Release Sonar QIS:',
+          err
+        );
+      }
+    });
+}
+
+
+
+
+onReleaseChange(): void {
+
+  if (!this.selectedReleaseId) {
+    return;
+  }
+
+  this.loadSelectedRelease();
+}
+
+
+
+loadReleases(): void {
+
+  this.releaseService
+    .getReleases()
+    .subscribe({
+
+      next: (data) => {
+
+        this.releases = data;
+
+        console.log(
+          'RELEASES:',
+          this.releases
+        );
+
+        /*
+         * Pour la démo :
+         * sélection automatique de 202603.0.0-BRM
+         */
+        const demoRelease =
+          this.releases.find(
+            r => r.version === '202603.0.0-BRM'
+          );
+
+        if (demoRelease) {
+
+          this.selectedReleaseId =
+            demoRelease.id;
+
+          this.loadSelectedRelease();
+        }
+
+        this.cdr.detectChanges();
+      },
+
+      error: (err) => {
+
+        console.error(
+          'Erreur chargement Releases:',
+          err
+        );
+      }
+    });
+}
+
+
+
   
  getFinalScore(): number {
 
@@ -502,11 +654,66 @@ exportPdf(): void {
 }
 
 
+analyzeRelease(): void {
 
+  if (!this.selectedReleaseId) {
+    this.analysisError =
+      'Please select a release first.';
+    return;
+  }
 
+  const releaseId = this.selectedReleaseId;
 
+  this.analyzingRelease = true;
+  this.analysisMessage = '';
+  this.analysisError = '';
 
+  this.releaseService
+    .analyzeRelease(releaseId)
+    .subscribe({
 
+      next: (result: QisSonar) => {
+
+        console.log(
+          'RELEASE ANALYSIS RESULT:',
+          result
+        );
+
+        this.analysisMessage =
+          `Analysis completed — Final QIS: ${result.finalQis}`;
+
+        /*
+         * Force le rafraîchissement de la Timeline
+         */
+        this.timelineRefreshKey++;
+
+        /*
+         * Recharge les KPI de la Release
+         */
+        this.loadSelectedRelease();
+
+        this.analyzingRelease = false;
+
+        this.cdr.detectChanges();
+      },
+
+      error: (err: unknown) => {
+
+        console.error(
+          'Release analysis failed:',
+          err
+        );
+
+        this.analysisError =
+          'Release analysis failed.';
+
+        this.analyzingRelease = false;
+
+        this.cdr.detectChanges();
+      }
+
+    });
+}
 
 
 

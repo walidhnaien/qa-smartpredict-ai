@@ -4,7 +4,10 @@ import {
   ViewChild,
   AfterViewInit,
   OnDestroy,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  Input,
+  OnChanges,
+  SimpleChanges
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
@@ -31,7 +34,12 @@ Chart.register(...registerables);
   styleUrl: './timeline.css'
 })
 export class Timeline
-  implements AfterViewInit, OnDestroy {
+  implements AfterViewInit, OnDestroy, OnChanges {
+
+  @Input()
+  releaseId: string | null = null;
+  @Input()
+  refreshKey = 0;
 
   @ViewChild('timelineChart')
   chartCanvas!: ElementRef<HTMLCanvasElement>;
@@ -40,9 +48,11 @@ export class Timeline
 
   private chart?: Chart;
 
-  loading = true;
+  loading = false;
 
   error = '';
+
+  private viewInitialized = false;
 
   constructor(
     private historyService: QualityHistoryService,
@@ -51,41 +61,119 @@ export class Timeline
 
   ngAfterViewInit(): void {
 
+    this.viewInitialized = true;
+
     this.loadHistory();
   }
+
+ngOnChanges(changes: SimpleChanges): void {
+
+  if (!this.viewInitialized) {
+    return;
+  }
+
+  if (
+    changes['releaseId'] ||
+    changes['refreshKey']
+  ) {
+
+    console.log(
+      'TIMELINE REFRESH:',
+      {
+        releaseId: this.releaseId,
+        refreshKey: this.refreshKey
+      }
+    );
+
+    this.loadHistory();
+  }
+}
 
   ngOnDestroy(): void {
 
     this.chart?.destroy();
   }
-
+  
+  
 loadHistory(): void {
+
+  console.log(
+    '=== TIMELINE LOAD HISTORY ==='
+  );
+
+  console.log(
+    'Release ID received:',
+    this.releaseId
+  );
+
+  this.chart?.destroy();
+  this.chart = undefined;
+
+  this.history = [];
+  this.error = '';
+
+  if (!this.releaseId) {
+
+    console.warn(
+      'TIMELINE: no releaseId received'
+    );
+
+    this.loading = false;
+
+    return;
+  }
 
   this.loading = true;
 
+  const releaseId = this.releaseId;
+
+  console.log(
+    'Calling history API for:',
+    releaseId
+  );
+
   this.historyService
-    .getHistory()
+    .getHistoryByRelease(releaseId)
     .subscribe({
 
-      next: data => {
+      next: (data: QualitySnapshot[]) => {
 
-        console.log('QUALITY HISTORY:', data);
+        console.log(
+          'TIMELINE API RESPONSE:',
+          data
+        );
+
+        console.log(
+          'TIMELINE SNAPSHOT COUNT:',
+          data.length
+        );
 
         this.history = data;
 
         this.loading = false;
 
-        // Rend le canvas après le *ngIf
         this.cdr.detectChanges();
 
-        // Puis création du graphique
-        this.createChart();
+        if (this.history.length > 0) {
+
+          setTimeout(() => {
+
+            console.log(
+              'Creating Timeline chart with',
+              this.history.length,
+              'snapshots'
+            );
+
+            this.createChart();
+
+          }, 0);
+        }
       },
 
-      error: err => {
+      error: (err: unknown) => {
 
         console.error(
-          'Erreur Quality History:',
+          'TIMELINE API ERROR:',
           err
         );
 
@@ -99,6 +187,7 @@ loadHistory(): void {
 
     });
 }
+
   private createChart(): void {
 
     if (!this.chartCanvas) {
@@ -126,37 +215,33 @@ loadHistory(): void {
 
           {
             label: 'QIS',
-            data:
-              this.history.map(
-                item => item.qis
-              ),
+            data: this.history.map(
+              item => item.qis
+            ),
             tension: 0.3
           },
 
           {
             label: 'Coverage',
-            data:
-              this.history.map(
-                item => item.coverageScore
-              ),
+            data: this.history.map(
+              item => item.coverageScore
+            ),
             tension: 0.3
           },
 
           {
             label: 'Defect',
-            data:
-              this.history.map(
-                item => item.defectScore
-              ),
+            data: this.history.map(
+              item => item.defectScore
+            ),
             tension: 0.3
           },
 
           {
             label: 'Sonar',
-            data:
-              this.history.map(
-                item => item.sonarScore
-              ),
+            data: this.history.map(
+              item => item.sonarScore
+            ),
             tension: 0.3
           }
 

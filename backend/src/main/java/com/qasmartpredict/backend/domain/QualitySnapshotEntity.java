@@ -17,6 +17,9 @@ public class QualitySnapshotEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "release_id")
+    private UUID releaseId;
+
     @Column(nullable = false)
     private LocalDateTime analysisDate;
 

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -18,8 +19,89 @@ public class QualitySnapshotService {
 
     private final QualitySnapshotRepository repository;
 
+    // =========================================================
+    // LEGACY : snapshot global
+    // =========================================================
 
     public void saveSnapshot(
+            double qis,
+            double coverage,
+            double defect,
+            double feedback,
+            double incident,
+            double sonar) {
+
+        QualitySnapshotEntity snapshot =
+                buildSnapshot(
+                        qis,
+                        coverage,
+                        defect,
+                        feedback,
+                        incident,
+                        sonar
+                );
+
+        repository.save(snapshot);
+    }
+
+    // =========================================================
+    // RELEASE : snapshot rattaché à une Release
+    // =========================================================
+
+    public void saveSnapshot(
+            UUID releaseId,
+            double qis,
+            double coverage,
+            double defect,
+            double feedback,
+            double incident,
+            double sonar) {
+
+        QualitySnapshotEntity snapshot =
+                buildSnapshot(
+                        qis,
+                        coverage,
+                        defect,
+                        feedback,
+                        incident,
+                        sonar
+                );
+
+        snapshot.setReleaseId(releaseId);
+
+        repository.save(snapshot);
+    }
+
+    // =========================================================
+    // LEGACY : historique global
+    // =========================================================
+
+    public List<QualitySnapshotDto> getHistory() {
+
+        return toDtos(
+                repository.findTop20ByOrderByAnalysisDateDesc()
+        );
+    }
+
+    // =========================================================
+    // RELEASE : historique filtré
+    // =========================================================
+
+    public List<QualitySnapshotDto> getHistory(UUID releaseId) {
+
+        return toDtos(
+                repository
+                    .findTop20ByReleaseIdOrderByAnalysisDateDesc(
+                        releaseId
+                    )
+        );
+    }
+
+    // =========================================================
+    // Construction snapshot
+    // =========================================================
+
+    private QualitySnapshotEntity buildSnapshot(
             double qis,
             double coverage,
             double defect,
@@ -31,55 +113,46 @@ public class QualitySnapshotService {
                 new QualitySnapshotEntity();
 
         snapshot.setAnalysisDate(
-                LocalDateTime.now());
+                LocalDateTime.now()
+        );
 
         snapshot.setQis(qis);
-
         snapshot.setCoverageScore(coverage);
-
         snapshot.setDefectScore(defect);
-
         snapshot.setFeedbackScore(feedback);
-
         snapshot.setIncidentScore(incident);
-
         snapshot.setSonarScore(sonar);
 
-        repository.save(snapshot);
+        return snapshot;
     }
 
+    // =========================================================
+    // Entity -> DTO
+    // =========================================================
 
-    public List<QualitySnapshotDto> getHistory() {
+    private List<QualitySnapshotDto> toDtos(
+            List<QualitySnapshotEntity> snapshots) {
 
-        return repository
-                .findTop20ByOrderByAnalysisDateDesc()
+        return snapshots
                 .stream()
 
-                // Pour Chart.js :
-                // ancien -> récent
+                // Chart.js : ancien -> récent
                 .sorted(
-                    Comparator.comparing(
-                        QualitySnapshotEntity::getAnalysisDate
-                    )
+                        Comparator.comparing(
+                                QualitySnapshotEntity::getAnalysisDate
+                        )
                 )
 
                 .map(snapshot ->
-                    new QualitySnapshotDto(
-
-                        snapshot.getAnalysisDate(),
-
-                        snapshot.getQis(),
-
-                        snapshot.getCoverageScore(),
-
-                        snapshot.getDefectScore(),
-
-                        snapshot.getFeedbackScore(),
-
-                        snapshot.getIncidentScore(),
-
-                        snapshot.getSonarScore()
-                    )
+                        new QualitySnapshotDto(
+                                snapshot.getAnalysisDate(),
+                                snapshot.getQis(),
+                                snapshot.getCoverageScore(),
+                                snapshot.getDefectScore(),
+                                snapshot.getFeedbackScore(),
+                                snapshot.getIncidentScore(),
+                                snapshot.getSonarScore()
+                        )
                 )
 
                 .toList();
