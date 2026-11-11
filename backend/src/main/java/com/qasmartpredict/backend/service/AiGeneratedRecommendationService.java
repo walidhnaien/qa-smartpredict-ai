@@ -16,12 +16,22 @@ public class AiGeneratedRecommendationService {
     private final ObjectMapper objectMapper;
 
     public AiRecommendationDto generateStructuredRecommendation(Map<String, Double> metrics) {
+        double qis = AiPromptBuilderService.requireMetric(metrics, "qis");
+        double coverage = AiPromptBuilderService.requireMetric(metrics, "coverageScore");
+        double defect = AiPromptBuilderService.requireMetric(metrics, "defectScore");
+        AiPromptBuilderService.requireMetric(metrics, "feedbackScore");
+        AiPromptBuilderService.requireMetric(metrics, "incidentScore");
+
+        String prompt = aiPromptBuilderService.buildPrompt(metrics);
+        String json = openAiClientService.generate(prompt);
         try {
-            String prompt = aiPromptBuilderService.buildPrompt(metrics);
-            String json = openAiClientService.generate(prompt);
-            return objectMapper.readValue(json, AiRecommendationDto.class);
+            AiRecommendationDto result = objectMapper.readValue(json, AiRecommendationDto.class);
+            // Never allow generated text to override deterministic fields.
+            result.setSprintDecision(AiPromptBuilderService.decisionFor(qis));
+            result.setRiskLevel(AiPromptBuilderService.riskFor(coverage, defect));
+            return result;
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to generate or parse AI recommendation", e);
+            throw new IllegalStateException("Failed to parse AI recommendation JSON", e);
         }
     }
 }
