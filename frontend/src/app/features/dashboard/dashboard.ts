@@ -23,6 +23,7 @@ import { AiQualityAdvisor }  from './components/ai-quality-advisor/ai-quality-ad
 import html2canvas from 'html2canvas';
 import { Release } from '../../core/models/release.model';
 import { ReleaseService } from '../../core/services/release.service';
+import { finalize } from 'rxjs';
 import jsPDF from 'jspdf';
 
 @Component({
@@ -43,6 +44,14 @@ export class Dashboard implements OnInit {
 selectedReleaseId: string | null = null;
 loadingRelease = false;
 analyzingRelease = false;
+isAiGenerating = false;
+aiElapsedSeconds = 0;
+aiGenerationError = '';
+
+private aiTimer?: ReturnType<typeof setInterval>;
+private aiRecommendationRequestId = 0;
+isAiRecommendationLoading = false;
+aiRecommendationError = '';
 analysisMessage = '';
 analysisError = '';
 timelineRefreshKey = 0;
@@ -94,30 +103,8 @@ ngOnInit(): void {
    */
   this.loadReleases();
 
-  /*
-   * Recommandations historiques/globales.
-   * On les conserve pour le moment.
-   */
-  this.aiService
-    .getRecommendations()
-    .subscribe({
+  // AI QA Assistant sera généré après le chargement des métriques de la release.
 
-      next: (data) => {
-
-        this.aiRecommendation = data;
-
-        this.cdr.detectChanges();
-      },
-
-      error: (err) => {
-
-        console.error(
-          'Erreur AI:',
-          err
-        );
-      }
-
-    });
 }
   
   loadRules(): void {
@@ -212,6 +199,10 @@ loadSelectedRelease(): void {
   this.score = null;
   this.qisSonar = null;
   this.aiIntelligence = null;
+  this.aiRecommendation = null;
+  this.aiRecommendationError = '';
+  this.isAiRecommendationLoading = false;
+  ++this.aiRecommendationRequestId; // Invalide toute réponse d'une release précédente.
 
   /*
    * QIS métier de la Release
@@ -279,6 +270,7 @@ loadSonarQisByRelease(
          * de la Release sélectionnée.
          */
         this.loadAiIntelligence();
+        this.loadAiRecommendation();
 
         this.cdr.detectChanges();
       },
@@ -537,34 +529,86 @@ loadAiIntelligence(): void {
       this.score.bugRatio
   };
 
+  this.isAiGenerating = true;
+  this.aiElapsedSeconds = 0;
+  this.aiGenerationError = '';
+
+  clearInterval(this.aiTimer);
+
+  this.aiTimer = setInterval(() => {
+    this.aiElapsedSeconds++;
+    this.cdr.detectChanges();
+  }, 1000);
+
   this.aiIntelligenceService
     .analyze(payload)
+    .pipe(
+      finalize(() => {
+        clearInterval(this.aiTimer);
+        this.isAiGenerating = false;
+        this.cdr.detectChanges();
+      })
+    )
     .subscribe({
-
       next: data => {
-
-        console.log(
-          'AI INTELLIGENCE:',
-          data
-        );
-
+        console.log('AI INTELLIGENCE:', data);
         this.aiIntelligence = data;
-
         this.cdr.detectChanges();
       },
 
       error: err => {
-
-        console.error(
-          'Erreur AI Intelligence:',
-          err
-        );
+        console.error('Erreur AI Intelligence:', err);
+        this.aiGenerationError =
+          'AI analysis failed. Please try again.';
+        this.cdr.detectChanges();
       }
-
     });
 }
 
 
+
+
+loadAiRecommendation(): void {
+  if (!this.score || !this.qisSonar || !this.selectedReleaseId) {
+    return;
+  }
+
+  const requestId = ++this.aiRecommendationRequestId;
+  const metrics: Record<string, number> = {
+    qis: this.getFinalScore(),
+    coverageScore: this.score.coverageScore,
+    defectScore: this.score.defectScore,
+    feedbackScore: this.score.feedbackScore,
+    incidentScore: this.score.incidentScore
+  };
+
+  this.aiRecommendation = null;
+  this.aiRecommendationError = '';
+  this.isAiRecommendationLoading = true;
+  this.cdr.detectChanges();
+
+  this.aiService.generateForRelease(metrics)
+    .pipe(finalize(() => {
+      if (requestId === this.aiRecommendationRequestId) {
+        this.isAiRecommendationLoading = false;
+        this.cdr.detectChanges();
+      }
+    }))
+    .subscribe({
+      next: data => {
+        if (requestId !== this.aiRecommendationRequestId) return;
+        this.aiRecommendation = data;
+        this.analysisDate = new Date();
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        if (requestId !== this.aiRecommendationRequestId) return;
+        console.error('Erreur AI QA Assistant:', err);
+        this.aiRecommendationError = 'AI analysis failed. Please try again.';
+        this.cdr.detectChanges();
+      }
+    });
+}
 exportPdf(): void {
 
   const dashboard =
@@ -680,7 +724,7 @@ analyzeRelease(): void {
         );
 
         this.analysisMessage =
-          `Analysis completed — Final QIS: ${result.finalQis}`;
+          'Analysis completed — Final QIS: ${result.finalQis}';
 
         /*
          * Force le rafraîchissement de la Timeline

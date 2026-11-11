@@ -13,7 +13,13 @@ export class AiRecommendationService {
 
   constructor(private http: HttpClient) {}
 
-  getRecommendations(): Observable<AiRecommendation> {
-    return this.http.get<AiRecommendation>(this.apiUrl);
+  generateForRelease(
+    metrics: Record<string, number>
+  ): Observable<AiRecommendation> {
+
+    return this.http.post<AiRecommendation>(
+      this.apiUrl,
+      metrics
+    );
   }
 }

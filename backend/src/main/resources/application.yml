@@ -24,3 +24,13 @@ ai:
   api-key: "${OPENROUTER_API_KEY:}"
   base-url: "https://openrouter.ai/api/v1"
   model: "openrouter/free"
+  
+qa:
+  llm:
+    mode: ${QA_LLM_MODE:LOCAL}
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://ollama:11434}
+      model: ${OLLAMA_MODEL:llama3.2:3b}
+    openrouter:
+      api-key: ${OPENROUTER_API_KEY:}
+      model: ${OPENROUTER_MODEL:openrouter/free}

@@ -7,6 +7,8 @@ import com.qasmartpredict.backend.service.OpenAiClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/ai")
 @RequiredArgsConstructor
@@ -24,12 +26,11 @@ public class AiPromptController {
 
     @GetMapping("/raw-generate")
     public String rawGenerate() {
-        String prompt = promptBuilderService.buildPrompt();
-        return openAiClientService.generate(prompt);
+        return openAiClientService.generate(promptBuilderService.buildPrompt());
     }
 
-    @GetMapping("/generate")
-    public AiRecommendationDto generate() {
-        return generatedRecommendationService.generateStructuredRecommendation();
+    @PostMapping("/generate")
+    public AiRecommendationDto generate(@RequestBody Map<String, Double> metrics) {
+        return generatedRecommendationService.generateStructuredRecommendation(metrics);
     }
 }

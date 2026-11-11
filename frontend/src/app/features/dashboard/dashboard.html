@@ -475,6 +475,48 @@
     </div>
 
 
+
+
+
+<!-- OLLAMA LOADING INDICATOR -->
+<div
+  class="ollama-loading-card"
+  *ngIf="isAiGenerating"
+  role="status"
+  aria-live="polite">
+
+  <div class="ollama-spinner"></div>
+
+  <h3>AI Quality Advisor is analyzing your release...</h3>
+
+  <p>
+    Ollama is generating the executive summary,
+    risk assessment and recommendations.
+  </p>
+
+  <div class="ollama-progress-track">
+    <div class="ollama-progress-bar"></div>
+  </div>
+
+  <div class="ollama-loading-footer">
+    <span>Elapsed time: {{ aiElapsedSeconds }} seconds</span>
+    <span>Please wait — this may take 30–90 seconds.</span>
+  </div>
+</div>
+
+<div
+  class="ollama-error"
+  *ngIf="aiGenerationError && !isAiGenerating"
+  role="alert">
+  {{ aiGenerationError }}
+</div>
+
+
+
+
+
+
+
     <!-- ======================================================= -->
     <!-- AI QA ASSISTANT -->
     <!-- ======================================================= -->

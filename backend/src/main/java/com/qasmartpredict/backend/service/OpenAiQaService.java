@@ -21,16 +21,18 @@ public class OpenAiQaService {
     private final ObjectMapper objectMapper;
     private final String model;
     private final String baseUrl;
+	private final LlmGatewayService llmGatewayService;
 
     public OpenAiQaService(
             @Value("${ai.api-key}") String apiKey,
             @Value("${ai.base-url}") String baseUrl,
             @Value("${ai.model}") String model,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,LlmGatewayService llmGatewayService) {
 
         this.objectMapper = objectMapper;
         this.model = model;
         this.baseUrl = baseUrl;
+		this.llmGatewayService = llmGatewayService;
 
         this.restClient =
                 RestClient.builder()
@@ -220,7 +222,7 @@ Map<String, Object> body =
                 "temperature", 0.2
         );
 
-        try {
+      /**  try {
 
             System.out.println(
                     "========== AI PROVIDER CALL =========="
@@ -309,7 +311,29 @@ Map<String, Object> body =
                     "Unable to parse OpenRouter AI response",
                     e
             );
-        }
+      } **/ 
+	  
+	  
+	  try {
+    String json = llmGatewayService.generate(
+            systemPrompt,
+            prompt
+    );
+
+    return objectMapper.readValue(
+            json,
+            AiGenerativeAnalysisDto.class
+    );
+
+} catch (Exception e) {
+    throw new IllegalStateException(
+            "Ollama QA analysis failed", e
+    );
+}
+	  
+	  
+	  
+	  
     }
 
     private String buildPrompt(
