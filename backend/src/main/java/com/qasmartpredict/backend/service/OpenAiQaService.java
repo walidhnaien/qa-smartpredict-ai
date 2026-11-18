@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.concurrent.TimeUnit;
 
 import java.util.List;
 import java.util.Map;
@@ -22,17 +24,27 @@ public class OpenAiQaService {
     private final String model;
     private final String baseUrl;
 	private final LlmGatewayService llmGatewayService;
+	private final OpenRouterJudgeService openRouterJudgeService;
+	private final AiOutputValidatorService aiOutputValidatorService;
+	private final AiValidationPersistenceService
+        aiValidationPersistenceService;
 
     public OpenAiQaService(
             @Value("${ai.api-key}") String apiKey,
             @Value("${ai.base-url}") String baseUrl,
             @Value("${ai.model}") String model,
-            ObjectMapper objectMapper,LlmGatewayService llmGatewayService) {
+            ObjectMapper objectMapper,LlmGatewayService llmGatewayService,
+        OpenRouterJudgeService openRouterJudgeService,
+        AiOutputValidatorService aiOutputValidatorService, AiValidationPersistenceService
+        aiValidationPersistenceService) {
 
         this.objectMapper = objectMapper;
         this.model = model;
         this.baseUrl = baseUrl;
 		this.llmGatewayService = llmGatewayService;
+		this.openRouterJudgeService = openRouterJudgeService;
+		this.aiOutputValidatorService = aiOutputValidatorService;
+		this.aiValidationPersistenceService = aiValidationPersistenceService;
 
         this.restClient =
                 RestClient.builder()
@@ -314,23 +326,178 @@ Map<String, Object> body =
       } **/ 
 	  
 	  
-	  try {
+
+
+try {
+
+    // 1. Generate original Llama response
+
+    long llamaStart = System.nanoTime();
+
     String json = llmGatewayService.generate(
             systemPrompt,
             prompt
     );
 
-    return objectMapper.readValue(
-            json,
-            AiGenerativeAnalysisDto.class
+    long llamaDurationMs = TimeUnit.NANOSECONDS
+            .toMillis(System.nanoTime() - llamaStart);
+
+    // 2. Initialize validation results
+
+    AiGenerativeAnalysisDto analysis = null;
+    Exception parsingError = null;
+
+    String javaStatus = "ERROR";
+    List<String> javaIssues = List.of();
+    String javaError = null;
+
+    String judgeStatus = "NOT_RUN";
+    JsonNode judgeResponse = null;
+    String judgeError = null;
+    String judgeModel = null;
+    Long judgeDurationMs = null;
+
+    // 3. Parse and validate with Java
+
+    try {
+        analysis = objectMapper.readValue(
+                json,
+                AiGenerativeAnalysisDto.class
+        );
+    } catch (Exception e) {
+        parsingError = e;
+        javaError = "JSON mapping error: " + e.getMessage();
+    }
+
+    if (parsingError == null) {
+
+        try {
+            var javaVerdict =
+                    aiOutputValidatorService.validate(
+                            qa,
+                            analysis,
+                            riskLevel,
+                            releaseDecision
+                    );
+
+            javaStatus = javaVerdict.status();
+            javaIssues = javaVerdict.issues();
+
+        } catch (Exception e) {
+            javaStatus = "ERROR";
+            javaError = e.getMessage();
+        }
+    }
+
+    System.out.println(
+            "[JAVA VALIDATOR] "
+            + javaStatus
+            + " - issues=" + javaIssues.size()
     );
 
+    for (String issue : javaIssues) {
+        System.out.println(
+                "[JAVA VALIDATOR] ISSUE: " + issue
+        );
+    }
+
+    // 4. Independent OpenRouter validation
+
+    long judgeStart = System.nanoTime();
+
+    try {
+        var judgeResult =
+                openRouterJudgeService.validateWithMetadata(
+                        prompt,
+                        json
+                );
+
+        judgeModel = judgeResult.selectedModel();
+        judgeResponse = judgeResult.verdict();
+
+        judgeStatus = judgeResponse
+                .path("status").asText();
+
+        System.out.println(
+                "[OPENROUTER JUDGE] "
+                + judgeResponse.toPrettyString()
+        );
+
+    } catch (Exception e) {
+
+        judgeStatus = "ERROR";
+        judgeError = e.getMessage();
+
+        System.err.println(
+                "[OPENROUTER JUDGE] ERROR: "
+                + judgeError
+        );
+
+    } finally {
+
+        judgeDurationMs = TimeUnit.NANOSECONDS
+                .toMillis(System.nanoTime() - judgeStart);
+    }
+
+    // 5. Save original metrics and decisions
+
+    ObjectNode sourceMetrics =
+            objectMapper.valueToTree(qa);
+
+    sourceMetrics.put("releaseDecision", releaseDecision);
+    sourceMetrics.put("riskLevel", riskLevel);
+    sourceMetrics.put("mainRisk", mainRisk);
+    sourceMetrics.put("confidence", confidence);
+
+    // Preserve the exact evaluation context
+    sourceMetrics.put("sourcePrompt", prompt);
+
+    // 6. Persist both validation results
+
+    try {
+
+        aiValidationPersistenceService.save(
+                sourceMetrics,
+                json,
+                javaStatus,
+                javaIssues,
+                javaError,
+                judgeStatus,
+                judgeResponse,
+                judgeError,
+                llmGatewayService.getModel(),
+                judgeModel,
+                llamaDurationMs,
+                judgeDurationMs
+        );
+
+    } catch (Exception e) {
+
+        System.err.println(
+                "[AI PERSISTENCE] ERROR: "
+                + e.getMessage()
+        );
+    }
+
+    // Preserve the existing parsing failure behavior
+
+    if (parsingError != null) {
+        throw parsingError;
+    }
+
+    // 7. Return original analysis without correction
+
+    return analysis;
+
 } catch (Exception e) {
+
     throw new IllegalStateException(
-            "Ollama QA analysis failed", e
+            "Ollama QA analysis failed",
+            e
     );
 }
-	  
+
+  
 	  
 	  
 	  

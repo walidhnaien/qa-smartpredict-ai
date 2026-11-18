@@ -16,6 +16,10 @@ public class LlmGatewayService {
     private final RestClient ollamaClient;
     private final ObjectMapper objectMapper;
     private final String model;
+	
+			public String getModel() {
+    return model;
+}
 
     public LlmGatewayService(
             @Value("${qa.llm.ollama.base-url:http://ollama:11434}")
@@ -41,6 +45,8 @@ public class LlmGatewayService {
         this.model = model;
         this.objectMapper = objectMapper;
     }
+	
+
 
     public String generate(
             String systemPrompt,
