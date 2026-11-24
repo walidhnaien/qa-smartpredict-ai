@@ -78,7 +78,7 @@ public class AiMultiAgentRevisionService {
         String systemPrompt = agentSkills.systemFor("LLAMA_REVISION", """
             Suggest up to two investigative questions for the QA manager based on the evidence.
             Do not rewrite official facts, assign severity, or change the release decision.
-            Questions only, no factual assertions. Keep each question under 20 words.
+            Ask only for missing release-specific evidence, not metric definitions or formulas. Questions only, no factual assertions. Keep each question under 20 words.
             Output only the schema object.
             """);
         String userPrompt = mapper.writeValueAsString(context);
@@ -110,7 +110,7 @@ public class AiMultiAgentRevisionService {
             if (risk.isBlank() || main.isBlank() || decision.isBlank())
                 throw new IllegalStateException("Missing official facts");
             String facts = "Official risk: " + risk + "; main risk: " + main + "; decision: " + decision + ".";
-            String definition = "DefectScore is a quality score, not a defect ratio. BugRatio is bugs per 100 stories.";
+            String definition = "DefectScore is a quality score, not a defect ratio. BugRatio is bugs per 100 stories. Lower DefectScore indicates weaker defect quality.";
             assembled.put("executiveSummary", facts + " " + definition);
             assembled.put("releaseRationale", facts + " Review residual risks before approval.");
             assembled.put("managerMessage", facts + " Review the evidence-backed actions with the QA manager.");
@@ -118,7 +118,7 @@ public class AiMultiAgentRevisionService {
             for (String key : List.of("riskLevel","mainRisk","releaseDecision","qis","confidence","defectScore","bugRatio"))
                 if (official.has(key)) assembled.set(key,official.get(key));
             ObjectNode top = assembled.putArray("topRisks").addObject();
-            top.put("dimension",main); top.put("severity",risk); top.put("reason",facts);
+            top.put("dimension",main); top.put("severity",risk); top.put("reason",facts + ("DEFECT_QUALITY".equals(main) && official.hasNonNull("defectScore") ? " Official DefectScore: " + official.path("defectScore").asText() + ". Lower DefectScore indicates weaker defect quality." : ""));
             var actions = assembled.putArray("priorityActions");
             for (JsonNode item : intelligence.path("prioritizedActions")) {
                 ObjectNode action = actions.addObject();
@@ -128,7 +128,11 @@ public class AiMultiAgentRevisionService {
                 action.put("expectedImpact","Not quantified; requires QA review");
             }
             ObjectNode advisory = assembled.putObject("aiAdvisory");
-            advisory.set("questions",proposal.get("questions"));
+            var questions = advisory.putArray("questions");
+            for (JsonNode q : proposal.path("questions")) {
+                String text = q.asText();
+                if (!java.util.regex.Pattern.compile("(?i)formula|definition|how does bugratio relate|how is (?:defectscore|bugratio) calculated").matcher(text).find()) questions.add(text);
+            }
             advisory.put("status","HUMAN_REVIEW_REQUIRED");
             ObjectNode revision = assembled.putObject("revision");
             for (String key : List.of("correctedIssues", "acceptedCritiques", "rejectedCritiques", "unverifiedClaims", "residualRisks", "requiredEvidence"))
@@ -145,9 +149,11 @@ public class AiMultiAgentRevisionService {
                 if ("RISK_LEVEL_CONTRADICTION".equals(type))
                     fixed = List.of("executiveSummary","releaseRationale","managerMessage").contains(field)
                             && assembled.path(field).asText().startsWith(facts);
-                else if ("METRIC_SEMANTICS_AMBIGUOUS".equals(type) && "defectScore".equals(field))
+                else if (List.of("METRIC_SEMANTICS_AMBIGUOUS", "DEFECT_SCORE_DIRECTION").contains(type) && "defectScore".equals(field))
                     fixed = assembled.path("executiveSummary").asText().contains(definition)
                             && assembled.path("defectScore").equals(official.path("defectScore"));
+                else if ("CONFIDENCE_RELEASE_JUSTIFICATION".equals(type))
+                    fixed = assembled.path("confidenceExplanation").asText().startsWith("Confidence in the analysis does not establish release safety.");
                 ObjectNode entry=resolution.addObject();
                 entry.put("issueId",id); entry.put("type",type); entry.put("field",field);
                 entry.put("resolved",fixed); entry.put("origin","JAVA_DETERMINISTIC_ASSEMBLY");
@@ -170,7 +176,7 @@ public class AiMultiAgentRevisionService {
               (id, validation_id, revision_version, model, prompt_version, input_snapshot,
                system_prompt, user_prompt, raw_response, revised_analysis, validation_report,
                execution_status, error_message, duration_ms)
-            VALUES (?, ?, 'LLAMA_V2', ?, 'REVISION_AGENT_CONTROLLED_V3_1', ?::jsonb,
+            VALUES (?, ?, 'LLAMA_V2', ?, 'REVISION_AGENT_CONTROLLED_V3_3', ?::jsonb,
                     ?, ?, ?, ?::jsonb, ?::jsonb, ?, ?, ?)
             """, revisionId, validationId, gateway.getModel(), mapper.writeValueAsString(audit),
                 systemPrompt, userPrompt, raw,

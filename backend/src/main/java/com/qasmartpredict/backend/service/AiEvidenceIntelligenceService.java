@@ -51,6 +51,24 @@ public class AiEvidenceIntelligenceService {
         if (source.has("defectScore") && candidate.toString().toLowerCase(Locale.ROOT).contains("defect quality ratio")) {
             checks.add(item("type", "METRIC_SEMANTICS_AMBIGUOUS", "field", "defectScore", "officialValue", source.get("defectScore"), "status", "REQUIRES_DEFINITION", "evidence", "Candidate calls defectScore a defect quality ratio; confirm formula and direction before interpreting it"));
         }
+        int riskIndex = 0;
+        for (JsonNode risk : candidate.path("topRisks")) {
+            String reason = risk.path("reason").asText("");
+            if (source.path("defectScore").isNumber() && Pattern.compile(
+                    "(?i)higher than expected defect quality score|high defect quality score indicates (?:potential )?(?:issues|poor|weak)").matcher(reason).find()) {
+                checks.add(item("type", "DEFECT_SCORE_DIRECTION", "field", "defectScore",
+                        "sourcePath", "/topRisks/" + riskIndex + "/reason", "officialValue", source.get("defectScore"),
+                        "evidence", reason, "status", "REQUIRES_REVIEW"));
+            }
+            riskIndex++;
+        }
+        String confidenceText = candidate.path("confidenceExplanation").asText("");
+        if (source.hasNonNull("confidence") && Pattern.compile(
+                "(?i)high confidence[^.!?]{0,100}supports the (?:deterministic )?release decision").matcher(confidenceText).find()) {
+            checks.add(item("type", "CONFIDENCE_RELEASE_JUSTIFICATION", "field", "confidenceExplanation",
+                    "sourcePath", "/confidenceExplanation", "officialValue", source.get("confidence"),
+                    "evidence", confidenceText, "status", "REQUIRES_REVIEW"));
+        }
         boolean candidateMentionsDefectRisk = candidate.path("topRisks").isArray() &&
                 containsRiskDimension(candidate.path("topRisks"), "DEFECT_QUALITY");
         for (int i=0; i<reviews.size(); i++) {

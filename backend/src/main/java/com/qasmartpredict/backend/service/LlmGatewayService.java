@@ -55,6 +55,10 @@ public class LlmGatewayService {
         return generateInternal(systemPrompt, userPrompt, "json", 1024, 0.2);
     }
 
+    public String generateInitial(String systemPrompt, String userPrompt) {
+        return generateInternal(systemPrompt, userPrompt, "json", 640, 0.1);
+    }
+
     public String generateRevision(String systemPrompt, String userPrompt, Object schema) {
         return generateInternal(systemPrompt, userPrompt, schema, 512, 0.1);
     }

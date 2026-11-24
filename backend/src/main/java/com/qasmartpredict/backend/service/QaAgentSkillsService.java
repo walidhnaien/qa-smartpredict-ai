@@ -17,7 +17,7 @@ import java.util.Map;
 /** Shared governance + skill loader. It does not replace deterministic Java validation. */
 @Service
 public class QaAgentSkillsService {
-    public static final String POLICY_VERSION = "QA_AGENT_POLICY_V3_1";
+    public static final String POLICY_VERSION = "QA_AGENT_POLICY_V3_3";
     private final QaMetricsCatalogService metrics;
     private final String globalPolicy;
     private final Map<String,String> skills;
@@ -116,6 +116,17 @@ public class QaAgentSkillsService {
     public String catalogContext(JsonNode official) {
         return "\nQA_METRICS_CATALOG (definitions only; official Java values take precedence):\n"
                 + relevantCatalog(official).toString() + "\n";
+    }
+
+    public String initialCatalogContext(JsonNode official) {
+        JsonNode defs = relevantCatalog(official).path("metrics");
+        StringBuilder out = new StringBuilder("\nMetric definitions (Java values authoritative):\n");
+        for (String key : List.of("defectScore", "bugRatio", "confidence", "coverageScore", "feedbackScore", "incidentScore")) {
+            JsonNode d = defs.path(key);
+            if (!d.isMissingNode()) out.append(key).append(": ").append(d.path("formula").asText("")).append(" ")
+                    .append(d.path("interpretation").asText("")).append(" ").append(d.path("coverageRule").asText("")).append("\n");
+        }
+        return out.toString();
     }
 
     public String catalogContext() {

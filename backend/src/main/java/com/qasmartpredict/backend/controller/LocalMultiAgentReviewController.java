@@ -72,7 +72,7 @@ public class LocalMultiAgentReviewController {
                        response_metadata->>'done_reason' AS done_reason, request_payload->>'reviewBatchId' AS batch_id,
                        created_at
                 FROM ai_review_result
-                WHERE validation_id = ? AND prompt_version IN ('MULTI_AGENT_V1','MULTI_AGENT_SKILLS_V1','MULTI_AGENT_SKILLS_V2','MULTI_AGENT_SKILLS_V2_1','MULTI_AGENT_EVIDENCE_V3','MULTI_AGENT_EVIDENCE_V3_1')
+                WHERE validation_id = ? AND prompt_version IN ('MULTI_AGENT_V1','MULTI_AGENT_SKILLS_V1','MULTI_AGENT_SKILLS_V2','MULTI_AGENT_SKILLS_V2_1','MULTI_AGENT_EVIDENCE_V3','MULTI_AGENT_EVIDENCE_V3_1','MULTI_AGENT_EVIDENCE_V3_3')
                 ORDER BY created_at DESC
                 """, validationId);
     }
@@ -151,7 +151,7 @@ public class LocalMultiAgentReviewController {
                   prompt_tokens, completion_tokens, total_duration_ms,
                   load_duration_ms, prompt_eval_duration_ms, eval_duration_ms,
                   execution_status, error_message
-                ) VALUES (?, ?, ?, 'OLLAMA', 'MULTI_AGENT_EVIDENCE_V3_1', 'JSON_SCHEMA', ?, ?,
+                ) VALUES (?, ?, ?, 'OLLAMA', 'MULTI_AGENT_EVIDENCE_V3_3', 'JSON_SCHEMA', ?, ?,
                   CAST(? AS jsonb), ?, CAST(? AS jsonb), CAST(? AS jsonb),
                   ?, 'NOT_RUN', 'NOT_RUN', ?, ?, ?, ?, ?, ?, ?, ?)
                 """, reviewId, validationId, model, system, user,

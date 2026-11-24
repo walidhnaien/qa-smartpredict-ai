@@ -31,11 +31,11 @@ public class QaEvidenceRegistryService {
         for(JsonNode check:checks) {
             String type=check.path("type").asText();
             String id="I"+(++index);
-            if(!Set.of("RISK_LEVEL_CONTRADICTION","METRIC_SEMANTICS_AMBIGUOUS").contains(type)) continue;
+            if(!Set.of("RISK_LEVEL_CONTRADICTION","METRIC_SEMANTICS_AMBIGUOUS","DEFECT_SCORE_DIRECTION","CONFIDENCE_RELEASE_JUSTIFICATION").contains(type)) continue;
             ObjectNode item=result.putObject(id);
             item.set("issue",check);
             item.put("required", "QWEN".equals(role));
-            item.putArray("actions").add(type.equals("RISK_LEVEL_CONTRADICTION")?"CORRECT_RISK_LEVEL":"CLARIFY_METRIC");
+            item.putArray("actions").add(type.equals("RISK_LEVEL_CONTRADICTION")?"CORRECT_RISK_LEVEL":type.equals("CONFIDENCE_RELEASE_JUSTIFICATION")?"EXPLAIN_CONFIDENCE":"CLARIFY_METRIC");
         }
         if("GEMMA".equals(role)) {
             addOption(result,official,"totalBugs","CHECK_SEVERITY","INVESTIGATE_CAUSE");

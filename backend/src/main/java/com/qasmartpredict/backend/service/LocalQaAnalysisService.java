@@ -59,7 +59,8 @@ public class LocalQaAnalysisService {
                 - Explain risks using only supplied data.
                 - Rank the most important quality risks.
                 - Produce actionable QA recommendations.
-                - Keep the analysis concise and professional.
+                - At most two risks and two actions. Each text field at most 25 words.
+                - Lower DefectScore means weaker quality. Confidence does not justify release approval.
 
                 Return ONLY valid JSON.
 
@@ -98,8 +99,8 @@ try {
     long llamaStart = System.nanoTime();
 
     String groundedSystemPrompt = agentSkills.systemFor("LLAMA_INITIAL", systemPrompt);
-    String groundedUserPrompt = prompt + agentSkills.catalogContext(objectMapper.valueToTree(qa));
-    String json = llmGatewayService.generate(
+    String groundedUserPrompt = prompt + agentSkills.initialCatalogContext(objectMapper.valueToTree(qa));
+    String json = llmGatewayService.generateInitial(
             groundedSystemPrompt,
             groundedUserPrompt
     );
@@ -245,18 +246,14 @@ try {
         return """
                 Analyze this QA release.
 
-                ==================================
                 DETERMINISTIC QUALITY DECISION
-                ==================================
 
                 Release Decision: %s
                 Risk Level: %s
                 Main Risk: %s
                 Confidence: %d%%
 
-                ==================================
                 QUALITY INTELLIGENCE
-                ==================================
 
                 QIS: %.2f
 
@@ -265,9 +262,7 @@ try {
                 Feedback: %.2f
                 Incident Stability: %.2f
 
-                ==================================
                 SONAR QUALITY
-                ==================================
 
                 Sonar Quality: %.2f
 
@@ -277,28 +272,21 @@ try {
                 Sonar Coverage: %s
                 Duplication: %s
 
-                ==================================
                 REQUIREMENT TRACEABILITY
-                ==================================
 
                 Requirements Total: %s
                 Covered Requirements: %s
                 Uncovered Requirements: %s
 
-                ==================================
                 DEFECT INFORMATION
-                ==================================
 
                 Stories: %s
                 Total Bugs: %s
                 Bug Ratio (bugs per 100 stories): %s
 
-                ==================================
                 EXPECTED ANALYSIS
-                ==================================
 
-                Explain why the deterministic release decision
-                is appropriate using only the supplied metrics.
+                Describe residual risks without claiming the decision is safe.
 
                 Identify the most important quality risks.
 

@@ -29,7 +29,7 @@ public class AiMultiAgentEvidenceController {
           SELECT reviewer_model, execution_status, parsed_response::text AS analysis,
                  request_payload->>'reviewBatchId' AS batch_id
           FROM ai_review_result
-          WHERE validation_id=? AND prompt_version='MULTI_AGENT_EVIDENCE_V3_1'
+          WHERE validation_id=? AND prompt_version='MULTI_AGENT_EVIDENCE_V3_3'
           ORDER BY created_at DESC, id DESC
           """,validationId);
         Map<String,JsonNode> byModel=new LinkedHashMap<>();
