@@ -1,0 +1,1 @@
+Java values and decisions are authoritative. Catalog defines semantics. Never invent evidence, severity or impact. Confidence is not proof of safety. Distinguish facts, hypotheses and unknowns. Human approval remains required.

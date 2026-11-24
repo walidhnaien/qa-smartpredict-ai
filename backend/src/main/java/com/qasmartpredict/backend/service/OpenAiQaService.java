@@ -24,6 +24,7 @@ public class OpenAiQaService {
     private final String model;
     private final String baseUrl;
 	private final LlmGatewayService llmGatewayService;
+    private final QaAgentSkillsService agentSkills;
 	private final OpenRouterJudgeService openRouterJudgeService;
 	private final AiOutputValidatorService aiOutputValidatorService;
 	private final AiValidationPersistenceService
@@ -36,12 +37,14 @@ public class OpenAiQaService {
             ObjectMapper objectMapper,LlmGatewayService llmGatewayService,
         OpenRouterJudgeService openRouterJudgeService,
         AiOutputValidatorService aiOutputValidatorService, AiValidationPersistenceService
-        aiValidationPersistenceService) {
+        aiValidationPersistenceService,
+        QaAgentSkillsService agentSkills) {
 
         this.objectMapper = objectMapper;
         this.model = model;
         this.baseUrl = baseUrl;
 		this.llmGatewayService = llmGatewayService;
+        this.agentSkills = agentSkills;
 		this.openRouterJudgeService = openRouterJudgeService;
 		this.aiOutputValidatorService = aiOutputValidatorService;
 		this.aiValidationPersistenceService = aiValidationPersistenceService;
@@ -334,9 +337,11 @@ try {
 
     long llamaStart = System.nanoTime();
 
+    String groundedSystemPrompt = agentSkills.systemFor("LLAMA_INITIAL", systemPrompt);
+    String groundedUserPrompt = prompt + agentSkills.catalogContext(objectMapper.valueToTree(qa));
     String json = llmGatewayService.generate(
-            systemPrompt,
-            prompt
+            groundedSystemPrompt,
+            groundedUserPrompt
     );
 
     long llamaDurationMs = TimeUnit.NANOSECONDS
@@ -450,7 +455,10 @@ try {
     sourceMetrics.put("confidence", confidence);
 
     // Preserve the exact evaluation context
-    sourceMetrics.put("sourcePrompt", prompt);
+    sourceMetrics.put("sourcePrompt", groundedUserPrompt);
+    sourceMetrics.put("sourceSystemPrompt", groundedSystemPrompt);
+    sourceMetrics.put("agentPolicyVersion", agentSkills.policyVersion());
+    sourceMetrics.put("metricsCatalogVersion", agentSkills.catalogVersion());
 
     // 6. Persist both validation results
 
@@ -528,8 +536,8 @@ try {
 
                 QIS: %.2f
 
-                Functional Coverage: %.2f
-                Defect Quality: %.2f
+                Epic Coverage Score: %.2f
+                Defect Score (quality score, not bug ratio): %.2f
                 Feedback: %.2f
                 Incident Stability: %.2f
 
@@ -559,7 +567,7 @@ try {
 
                 Stories: %s
                 Total Bugs: %s
-                Bug Ratio: %s
+                Bug Ratio (bugs per 100 stories): %s
 
                 ==================================
                 EXPECTED ANALYSIS

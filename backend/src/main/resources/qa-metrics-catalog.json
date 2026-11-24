@@ -1,0 +1,281 @@
+{
+  "catalogVersion": "QA_METRICS_V2",
+  "authority": "Metric definitions describe interpretation; official values are calculated by Java.",
+  "metrics": {
+    "bugRatio": {
+      "label": "Bug Ratio",
+      "formula": "(totalBugs / totalStories) * 100",
+      "unit": "bugs per 100 stories",
+      "interpretation": "Higher means more reported bugs relative to user stories.",
+      "limitations": [
+        "Not the percentage of defective stories.",
+        "Not a defect severity measure.",
+        "Can exceed 100 when bugs exceed stories.",
+        "Undefined when totalStories is zero unless Java defines a rule."
+      ]
+    },
+    "defectScore": {
+      "label": "Defect Quality Score",
+      "formula": "100 - bugRatio",
+      "unit": "quality score (not a defect percentage)",
+      "interpretation": "Lower score indicates weaker quality in the defect dimension under this formula.",
+      "limitations": [
+        "Not the percentage of bugs or critical defects.",
+        "Do not infer defect severity or business impact.",
+        "Can become negative if bugRatio exceeds 100 unless Java clamps it."
+      ]
+    },
+    "confidence": {
+      "label": "Internal confidence indicator",
+      "formula": null,
+      "interpretation": "An application-specific indicator; its computation and meaning must be verified against Java implementation.",
+      "limitations": [
+        "Not independent proof of data reliability, release safety or decision correctness."
+      ]
+    },
+    "riskLevel": {
+      "label": "Official release risk level",
+      "formula": null,
+      "interpretation": "Use the exact value supplied by Java; do not downgrade or contradict it.",
+      "limitations": [
+        "Do not infer individual defect severity from the overall risk level."
+      ]
+    },
+    "releaseDecision": {
+      "label": "Official release decision",
+      "formula": null,
+      "interpretation": "Use the exact decision supplied by Java and describe the residual risks.",
+      "limitations": [
+        "GO_WITH_RISK does not mean that the release is proven safe or that risk acceptance is documented."
+      ]
+    },
+    "totalBugs": {
+      "label": "Reported bug count",
+      "formula": null,
+      "interpretation": "Reported total bug count used by the relevant QA metric.",
+      "limitations": [
+        "Do not equate with Sonar bugs unless data provenance confirms equivalence."
+      ]
+    },
+    "bugs": {
+      "label": "Sonar bug count (when sourced from SonarQube)",
+      "formula": null,
+      "interpretation": "Static analysis bug findings; verify provenance of the field.",
+      "limitations": [
+        "Do not automatically add to or equate with totalBugs."
+      ]
+    },
+    "codeSmells": {
+      "label": "Code smells",
+      "formula": null,
+      "interpretation": "Static-analysis maintainability findings.",
+      "limitations": [
+        "Not direct proof of runtime defects or root causes."
+      ]
+    },
+    "uncoveredRequirements": {
+      "label": "Uncovered requirements",
+      "formula": null,
+      "interpretation": "Requirements not covered according to the application's coverage mapping.",
+      "limitations": [
+        "Criticality and business impact require separate evidence."
+      ]
+    },
+    "coverageScore": {
+      "label": "Epic Coverage Score",
+      "formula": "(coveredEpics / totalEpics) * 100",
+      "coverageRule": "An Epic is covered if it has at least one Story and every Story is Done. An Epic with zero Stories is NOT covered.",
+      "unit": "percent",
+      "example": {
+        "totalEpics": 5,
+        "coveredEpics": 4,
+        "coverageScore": 80
+      },
+      "limitations": [
+        "This is Epic-level functional coverage, not Sonar code coverage.",
+        "An Epic with any Story not Done is not covered.",
+        "Undefined for zero totalEpics unless Java defines a fallback.",
+        "Do not automatically equate with requirement coverage unless mappings establish equivalence."
+      ]
+    },
+    "incidentRate": {
+      "label": "Customer Incident Rate",
+      "formula": "(customerIncidents / totalBugs) * 100",
+      "unit": "percent",
+      "classification": "Customer incident is identified through a Jira Summary matching a configured client name (e.g. Cargill, Bunge, Barclays); verify exact matching implementation.",
+      "example": {
+        "customerIncidents": 3,
+        "totalBugs": 7,
+        "incidentRate": 42.86
+      },
+      "limitations": [
+        "Classification by Summary text is a heuristic and may miss or misclassify incidents.",
+        "Undefined if totalBugs=0 unless Java defines fallback."
+      ]
+    },
+    "incidentScore": {
+      "label": "Incident Quality Score",
+      "formula": "100 - incidentRate",
+      "unit": "quality score on a nominal 0–100 scale",
+      "example": {
+        "incidentRate": 42.86,
+        "incidentScore": 57.14
+      },
+      "limitations": [
+        "Not direct customer satisfaction.",
+        "Uses the same customer-incident classification as incidentRate."
+      ]
+    },
+    "feedbackScore": {
+      "label": "Critical Customer Incident Absence Proxy",
+      "formula": "100 if count(customer incidents with severity BLOCKER or CRITICAL) == 0 else 0",
+      "unit": "binary quality score (0 or 100)",
+      "example": {
+        "criticalCustomerIncidents": 0,
+        "feedbackScore": 100
+      },
+      "limitations": [
+        "Does not measure direct customer satisfaction or NPS.",
+        "A 100 score means no identified critical/blocker customer incident, not all customers are satisfied.",
+        "Depends on customer-incident identification and severity data."
+      ]
+    },
+    "rcaCoverage": {
+      "label": "RCA Coverage",
+      "formula": "(customerIncidentsWithRca / totalCustomerIncidents) * 100",
+      "unit": "percent",
+      "limitations": [
+        "Undefined for zero customer incidents unless Java defines fallback."
+      ]
+    },
+    "correctiveActionCoverage": {
+      "label": "Corrective Action Coverage",
+      "formula": "(rcasWithCorrectiveAction / totalRcas) * 100",
+      "unit": "percent",
+      "limitations": [
+        "Undefined for zero RCAs unless Java defines fallback."
+      ]
+    },
+    "preventiveActionCoverage": {
+      "label": "Preventive Action Coverage",
+      "formula": "(rcasWithPreventiveAction / totalRcas) * 100",
+      "unit": "percent",
+      "limitations": [
+        "Undefined for zero RCAs unless Java defines fallback."
+      ]
+    },
+    "rcaClosureRate": {
+      "label": "RCA Closure Rate",
+      "formula": "(closedRcas / totalRcas) * 100",
+      "unit": "percent",
+      "limitations": [
+        "Undefined for zero RCAs unless Java defines fallback."
+      ]
+    },
+    "rcaScore": {
+      "label": "RCA Quality Score",
+      "formula": "0.30 * rcaCoverage + 0.25 * correctiveActionCoverage + 0.25 * preventiveActionCoverage + 0.20 * rcaClosureRate",
+      "weights": {
+        "rcaCoverage": 0.3,
+        "correctiveActionCoverage": 0.25,
+        "preventiveActionCoverage": 0.25,
+        "rcaClosureRate": 0.2
+      },
+      "example": {
+        "rcaCoverage": 100,
+        "correctiveActionCoverage": 100,
+        "preventiveActionCoverage": 100,
+        "rcaClosureRate": 66.67,
+        "rcaScore": 93.33
+      },
+      "limitations": [
+        "30/25/25/20 are weights, not observed release percentages.",
+        "Do not infer actual effectiveness of corrective actions from coverage alone."
+      ]
+    },
+    "sonarScore": {
+      "label": "Sonar Technical Quality Score",
+      "formula": "0.35 * sonarBugSubscore + 0.30 * sonarVulnerabilitySubscore + 0.20 * sonarCodeSmellSubscore + 0.15 * sonarDuplicationSubscore",
+      "weights": {
+        "sonarBugSubscore": 0.35,
+        "sonarVulnerabilitySubscore": 0.3,
+        "sonarCodeSmellSubscore": 0.2,
+        "sonarDuplicationSubscore": 0.15
+      },
+      "example": {
+        "sonarBugs": 4,
+        "vulnerabilities": 1,
+        "codeSmells": 35,
+        "duplicationPercent": 4.3,
+        "sonarCoveragePercent": 72.5,
+        "subscores": {
+          "sonarBugSubscore": 80,
+          "sonarVulnerabilitySubscore": 90,
+          "sonarCodeSmellSubscore": 75,
+          "sonarDuplicationSubscore": 70
+        },
+        "sonarScore": 75.25
+      },
+      "limitations": [
+        "Subscore conversion thresholds are not specified in the provided diagrams; verify implementation.",
+        "Sonar code coverage is displayed separately and NOT included in this Sonar Score.",
+        "Technical Sonar bugs are not automatically the same as Jira totalBugs."
+      ]
+    },
+    "businessQis": {
+      "label": "Business Quality Intelligence Score",
+      "formula": "sum((configuredWeight_i / sumConfiguredWeights) * businessScore_i) over coverage, defect, feedback, incident, rca",
+      "businessDimensions": [
+        "coverageScore",
+        "defectScore",
+        "feedbackScore",
+        "incidentScore",
+        "rcaScore"
+      ],
+      "weightsSource": "Rule Designer; configurable and normalized by the sum of configured weights",
+      "example": {
+        "configuredWeights": {
+          "coverage": 90,
+          "defect": 49,
+          "feedback": 60,
+          "incident": 45,
+          "rca": 45
+        },
+        "weightSum": 289,
+        "scores": {
+          "coverage": 80,
+          "defect": 22.22,
+          "feedback": 100,
+          "incident": 57.14,
+          "rca": 93.33
+        },
+        "businessQis": 72.87
+      },
+      "limitations": [
+        "Business QIS is the normalized weighted average BEFORE the final 80% business contribution.",
+        "Do not apply 80% within Business QIS; apply it only in QIS Final."
+      ]
+    },
+    "qisFinal": {
+      "label": "Final Quality Intelligence Score",
+      "formula": "0.80 * businessQis + 0.20 * sonarScore",
+      "example": {
+        "businessQis": 72.87,
+        "businessContribution": 58.3,
+        "sonarScore": 75.25,
+        "sonarContribution": 15.05,
+        "qisFinal": 73.35
+      },
+      "limitations": [
+        "Use official Java values rather than slide examples.",
+        "Rounded display contributions may differ from full-precision intermediate values."
+      ]
+    }
+  },
+  "sourceNotes": [
+    "Rules transcribed from user-supplied QA metric diagrams (November 2026).",
+    "Business QIS is 72.87 BEFORE the final 80% weight; 72.87*0.8 + 75.25*0.2 = 73.35.",
+    "Example values are illustrative and must not override official release metrics.",
+    "Where denominator is zero or a transformation threshold is unspecified, consult Java implementation."
+  ]
+}

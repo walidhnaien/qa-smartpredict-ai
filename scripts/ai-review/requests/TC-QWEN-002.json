@@ -1,0 +1,22 @@
+curl http://localhost:11434/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen2.5:3b",
+    "stream": false,
+    "keep_alive": 0,
+    "format": "json",
+    "options": {
+      "temperature": 0,
+      "num_ctx": 4096
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a QA reviewer. SOURCE_OF_TRUTH contains correct and immutable data. CANDIDATE contains potentially incorrect data. Never modify SOURCE_OF_TRUTH. Compare each field separately. Quality scores below 50 are poor. Report all mismatches. Return JSON with status, score, issues and explanation. Each issue must contain field, expected, actual and suggested_correction."
+      },
+      {
+        "role": "user",
+        "content": "SOURCE_OF_TRUTH: {\"qis\":68.89,\"defectQuality\":22.22,\"defectQualityRating\":\"POOR\",\"risk\":\"HIGH\",\"decision\":\"GO_WITH_RISK\"}\nCANDIDATE: {\"qis\":95,\"defectQualityRating\":\"EXCELLENT\",\"risk\":\"LOW\",\"decision\":\"GO\"}"
+      }
+    ]
+  }'

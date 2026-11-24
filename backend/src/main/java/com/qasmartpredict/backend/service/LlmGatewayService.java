@@ -34,8 +34,8 @@ public class LlmGatewayService {
         // 10 seconds to establish the connection
         requestFactory.setConnectTimeout(10_000);
 
-        // 180 seconds for Ollama to generate the response
-        requestFactory.setReadTimeout(180_000);
+        // 240 seconds for Ollama to generate the response
+        requestFactory.setReadTimeout(240_000);
 
         this.ollamaClient = RestClient.builder()
                 .baseUrl(baseUrl)
@@ -55,6 +55,7 @@ public class LlmGatewayService {
         Map<String, Object> body = Map.of(
                 "model", model,
                 "stream", false,
+                "keep_alive", 0,
                 "format", "json",
                 "messages", new Object[] {
                         Map.of(
@@ -68,7 +69,7 @@ public class LlmGatewayService {
                 },
                 "options", Map.of(
                         "temperature", 0.2,
-                        "num_predict", 1024
+                        "num_predict", 1024, "num_ctx", 4096, "repeat_penalty", 1.15
                 )
         );
 
@@ -92,6 +93,10 @@ public class LlmGatewayService {
                 );
             }
 
+            System.out.println("[OLLAMA] prompt_tokens=" + response.path("prompt_eval_count")
+                    + " completion_tokens=" + response.path("eval_count") + " done_reason=" + response.path("done_reason")
+                    + " load_ns=" + response.path("load_duration") + " prompt_ns=" + response.path("prompt_eval_duration") + " eval_ns=" + response.path("eval_duration"));
+            if ("length".equals(response.path("done_reason").asText())) throw new IllegalStateException("Truncated Ollama output");
             String content = response
                     .path("message")
                     .path("content")

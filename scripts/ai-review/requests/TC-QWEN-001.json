@@ -1,0 +1,22 @@
+curl http://localhost:11434/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "qwen2.5:3b",
+    "stream": false,
+    "keep_alive": 0,
+    "format": "json",
+    "options": {
+      "temperature": 0,
+      "num_ctx": 4096
+    },
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are an independent senior QA technical reviewer. Validate the analysis against official metrics. Higher quality scores mean better quality. Return JSON with status PASS or FAIL, score from 0 to 100, issues array and explanation."
+      },
+      {
+        "role": "user",
+        "content": "Official metrics: QIS=68.89, Defect Quality=22.22, Risk=HIGH, Decision=GO_WITH_RISK. Analysis to review: The QIS is 95, defect quality is excellent, risk is LOW and release decision is GO."
+      }
+    ]
+  }'

@@ -1,0 +1,104 @@
+{
+  "model": "gemma3:4b",
+  "stream": false,
+  "keep_alive": 0,
+  "format": {
+    "type": "object",
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": [
+          "PASS",
+          "FAIL"
+        ]
+      },
+      "score": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      },
+      "issues": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "CONTRADICTION",
+                "INCORRECT_VALUE",
+                "INCORRECT_INTERPRETATION"
+              ]
+            },
+            "location": {
+              "type": "string"
+            },
+            "field": {
+              "type": "string"
+            },
+            "evidence": {
+              "type": "string"
+            },
+            "expected": {
+              "type": [
+                "number",
+                "string"
+              ]
+            },
+            "actual": {
+              "type": [
+                "number",
+                "string"
+              ]
+            },
+            "correction_value": {
+              "type": [
+                "number",
+                "string"
+              ]
+            },
+            "suggested_correction": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "location",
+            "field",
+            "evidence",
+            "expected",
+            "actual",
+            "correction_value",
+            "suggested_correction"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "explanation": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "status",
+      "score",
+      "issues",
+      "explanation"
+    ],
+    "additionalProperties": false
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "\nYou are an independent software QA technical reviewer.\n\nSOURCE_OF_TRUTH contains official immutable metrics.\nCANDIDATE contains an AI-generated QA analysis.\n\nReview the candidate against the source of truth.\n\nRules:\n1. Never modify official metrics.\n2. Higher quality scores mean better quality.\n3. Do not confuse a quality score with a bug ratio.\n4. Do not confuse confidence with release safety.\n5. Report factual contradictions and incorrect values.\n6. Report each occurrence separately.\n7. Every issue must include its exact JSON location.\n8. Evidence must be an exact substring of the\n   candidate text at that location.\n9. Never invent evidence.\n10. Expected and correction_value must match the\n    official source value.\n11. Do not flag an absent statement as a contradiction.\n12. If no verified issue exists, return PASS.\n13. Otherwise return FAIL.\n\nFocus on verifiable factual and interpretation errors.\nDo not report generic recommendations or omissions\nin this first qualification.\n\nReturn only the required JSON structure.\n"
+    },
+    {
+      "role": "user",
+      "content": "SOURCE_OF_TRUTH:\n{\n  \"qis\": 68.89,\n  \"bugs\": 4,\n  \"bugRatio\": 77.77777777777777,\n  \"mainRisk\": \"DEFECT_QUALITY\",\n  \"riskLevel\": \"HIGH\",\n  \"totalBugs\": 7,\n  \"codeSmells\": 35,\n  \"confidence\": 95,\n  \"sonarScore\": 75.25,\n  \"defectScore\": 22.22222222222223,\n  \"duplication\": 4.3,\n  \"totalStories\": 9,\n  \"coverageScore\": 80.0,\n  \"feedbackScore\": 100.0,\n  \"incidentScore\": 57.14,\n  \"sonarCoverage\": 72.5,\n  \"releaseDecision\": \"GO_WITH_RISK\",\n  \"vulnerabilities\": 1,\n  \"totalRequirements\": 5,\n  \"coveredRequirements\": 4,\n  \"uncoveredRequirements\": 1\n}\n\nCANDIDATE:\n{\n  \"topRisks\": [\n    {\n      \"reason\": \"The defect quality ratio of 22.22% indicates a significant quality concern.\",\n      \"severity\": \"HIGH\",\n      \"dimension\": \"DEFECT_QUALITY\"\n    }\n  ],\n  \"managerMessage\": \"The release decision is based on the high confidence level and the fact that the main risk, DEFECT_QUALITY, is at a moderate level. However, the high defect quality ratio of 22.22% indicates a significant quality concern.\",\n  \"priorityActions\": [\n    {\n      \"action\": \"Fix high-priority defects\",\n      \"priority\": 1,\n      \"expectedImpact\": \"High\"\n    },\n    {\n      \"action\": \"Improve defect quality\",\n      \"priority\": 2,\n      \"expectedImpact\": \"Medium\"\n    },\n    {\n      \"action\": \"Enhance testing and quality assurance processes\",\n      \"priority\": 3,\n      \"expectedImpact\": \"Low\"\n    }\n  ],\n  \"executiveSummary\": \"The deterministic release decision is appropriate due to the high confidence level of 95% and the fact that the main risk, DEFECT_QUALITY, is at a moderate level. However, the high defect quality ratio of 22.22% indicates a significant quality concern.\",\n  \"releaseRationale\": \"The release decision is based on the high confidence level and the fact that the main risk, DEFECT_QUALITY, is at a moderate level.\",\n  \"confidenceExplanation\": \"The high confidence level of 95% indicates that the release decision is based on reliable data. However, the high defect quality ratio of 22.22% indicates a significant quality concern.\"\n}"
+    }
+  ],
+  "options": {
+    "temperature": 0,
+    "num_ctx": 4096,
+    "num_predict": 1536
+  }
+}

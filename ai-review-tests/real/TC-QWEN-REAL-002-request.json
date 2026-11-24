@@ -1,0 +1,65 @@
+{
+  "model": "qwen2.5:3b",
+  "stream": false,
+  "keep_alive": 0,
+  "format": {
+    "type": "object",
+    "properties": {
+      "claims": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "location": {
+              "type": "string"
+            },
+            "field": {
+              "type": "string",
+              "enum": [
+                "riskLevel"
+              ]
+            },
+            "evidence": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string",
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH",
+                "CRITICAL"
+              ]
+            }
+          },
+          "required": [
+            "location",
+            "field",
+            "evidence",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "claims"
+    ],
+    "additionalProperties": false
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "\nYou are an information extraction assistant.\n\nYour task is NOT to review, correct or evaluate\nthe candidate.\n\nExtract every explicit claim about the severity\nof the main risk DEFECT_QUALITY.\n\nUse these normalization rules:\n- low = LOW\n- moderate or medium = MEDIUM\n- high = HIGH\n- critical = CRITICAL\n\nFor each claim:\n1. Return the JSON location as a JSON Pointer.\n2. Copy the exact evidence from the candidate.\n3. Return the normalized risk level.\n4. Do not invent claims.\n5. Do not report sections without an explicit\n   claim about risk severity.\n6. Include repeated claims from different sections.\n\nDo not extract action priorities, expected impact,\nconfidence levels or quality scores.\n\nReturn only JSON.\n"
+    },
+    {
+      "role": "user",
+      "content": "{\n  \"topRisks\": [\n    {\n      \"reason\": \"The defect quality ratio of 22.22% indicates a significant quality concern.\",\n      \"severity\": \"HIGH\",\n      \"dimension\": \"DEFECT_QUALITY\"\n    }\n  ],\n  \"managerMessage\": \"The release decision is based on the high confidence level and the fact that the main risk, DEFECT_QUALITY, is at a moderate level. However, the high defect quality ratio of 22.22% indicates a significant quality concern.\",\n  \"priorityActions\": [\n    {\n      \"action\": \"Fix high-priority defects\",\n      \"priority\": 1,\n      \"expectedImpact\": \"High\"\n    },\n    {\n      \"action\": \"Improve defect quality\",\n      \"priority\": 2,\n      \"expectedImpact\": \"Medium\"\n    },\n    {\n      \"action\": \"Enhance testing and quality assurance processes\",\n      \"priority\": 3,\n      \"expectedImpact\": \"Low\"\n    }\n  ],\n  \"executiveSummary\": \"The deterministic release decision is appropriate due to the high confidence level of 95% and the fact that the main risk, DEFECT_QUALITY, is at a moderate level. However, the high defect quality ratio of 22.22% indicates a significant quality concern.\",\n  \"releaseRationale\": \"The release decision is based on the high confidence level and the fact that the main risk, DEFECT_QUALITY, is at a moderate level.\",\n  \"confidenceExplanation\": \"The high confidence level of 95% indicates that the release decision is based on reliable data. However, the high defect quality ratio of 22.22% indicates a significant quality concern.\"\n}"
+    }
+  ],
+  "options": {
+    "temperature": 0,
+    "num_ctx": 4096,
+    "num_predict": 1024
+  }
+}
