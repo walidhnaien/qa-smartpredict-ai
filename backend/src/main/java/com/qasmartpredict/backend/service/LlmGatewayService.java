@@ -52,11 +52,19 @@ public class LlmGatewayService {
             String systemPrompt,
             String userPrompt) {
 
+        return generateInternal(systemPrompt, userPrompt, "json", 1024, 0.2);
+    }
+
+    public String generateRevision(String systemPrompt, String userPrompt, Object schema) {
+        return generateInternal(systemPrompt, userPrompt, schema, 512, 0.1);
+    }
+
+    private String generateInternal(String systemPrompt, String userPrompt, Object format, int budget, double temperature) {
         Map<String, Object> body = Map.of(
                 "model", model,
                 "stream", false,
                 "keep_alive", 0,
-                "format", "json",
+                "format", format,
                 "messages", new Object[] {
                         Map.of(
                                 "role", "system",
@@ -68,8 +76,8 @@ public class LlmGatewayService {
                         )
                 },
                 "options", Map.of(
-                        "temperature", 0.2,
-                        "num_predict", 1024, "num_ctx", 4096, "repeat_penalty", 1.15
+                        "temperature", temperature,
+                        "num_predict", budget, "num_ctx", 4096, "repeat_penalty", 1.15
                 )
         );
 
