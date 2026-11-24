@@ -36,8 +36,6 @@ services:
       QA_LLM_MODE: LOCAL
       OLLAMA_BASE_URL: http://ollama:11434
       OLLAMA_MODEL: llama3.2:3b
-      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
-      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openrouter/free}
       SERVER_PORT: 8081
     ports:
       - "8081:8081"

@@ -12,7 +12,7 @@ import java.util.Map;
 public class AiGeneratedRecommendationService {
 
     private final AiPromptBuilderService aiPromptBuilderService;
-    private final OpenAiClientService openAiClientService;
+    private final LocalAiClientService localAiClientService;
     private final ObjectMapper objectMapper;
 
     public AiRecommendationDto generateStructuredRecommendation(Map<String, Double> metrics) {
@@ -23,7 +23,7 @@ public class AiGeneratedRecommendationService {
         AiPromptBuilderService.requireMetric(metrics, "incidentScore");
 
         String prompt = aiPromptBuilderService.buildPrompt(metrics);
-        String json = openAiClientService.generate(prompt);
+        String json = localAiClientService.generate(prompt);
         try {
             AiRecommendationDto result = objectMapper.readValue(json, AiRecommendationDto.class);
             // Never allow generated text to override deterministic fields.

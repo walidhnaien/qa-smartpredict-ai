@@ -3,7 +3,7 @@ package com.qasmartpredict.backend.controller;
 import com.qasmartpredict.backend.dto.AiRecommendationDto;
 import com.qasmartpredict.backend.service.AiGeneratedRecommendationService;
 import com.qasmartpredict.backend.service.AiPromptBuilderService;
-import com.qasmartpredict.backend.service.OpenAiClientService;
+import com.qasmartpredict.backend.service.LocalAiClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +16,7 @@ import java.util.Map;
 public class AiPromptController {
 
     private final AiPromptBuilderService promptBuilderService;
-    private final OpenAiClientService openAiClientService;
+    private final LocalAiClientService localAiClientService;
     private final AiGeneratedRecommendationService generatedRecommendationService;
 
     @GetMapping("/prompt")
@@ -26,7 +26,7 @@ public class AiPromptController {
 
     @GetMapping("/raw-generate")
     public String rawGenerate() {
-        return openAiClientService.generate(promptBuilderService.buildPrompt());
+        return localAiClientService.generate(promptBuilderService.buildPrompt());
     }
 
     @PostMapping("/generate")

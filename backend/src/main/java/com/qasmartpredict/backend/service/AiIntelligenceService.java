@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AiIntelligenceService {
 	
-	private final OpenAiQaService openAiQaService;
+	private final LocalQaAnalysisService localQaAnalysisService;
 
     public AiIntelligenceResponse analyze(
             AiIntelligenceRequest request) {
@@ -223,7 +223,7 @@ AiGenerativeAnalysisDto aiAnalysis;
 try {
 
     aiAnalysis =
-            openAiQaService.generateAnalysis(
+            localQaAnalysisService.generateAnalysis(
                     request,
                     decision,
                     risk,
