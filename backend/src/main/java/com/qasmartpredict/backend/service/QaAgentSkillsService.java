@@ -17,7 +17,7 @@ import java.util.Map;
 /** Shared governance + skill loader. It does not replace deterministic Java validation. */
 @Service
 public class QaAgentSkillsService {
-    public static final String POLICY_VERSION = "QA_AGENT_POLICY_V2";
+    public static final String POLICY_VERSION = "QA_AGENT_POLICY_V3_1";
     private final QaMetricsCatalogService metrics;
     private final String globalPolicy;
     private final Map<String,String> skills;

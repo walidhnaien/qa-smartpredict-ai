@@ -126,7 +126,7 @@ public class AiMultiAgentRevisionService {
               (id, validation_id, revision_version, model, prompt_version, input_snapshot,
                system_prompt, user_prompt, raw_response, revised_analysis, validation_report,
                execution_status, error_message, duration_ms)
-            VALUES (?, ?, 'LLAMA_V2', ?, 'REVISION_AGENT_SKILLS_V2', ?::jsonb,
+            VALUES (?, ?, 'LLAMA_V2', ?, 'REVISION_AGENT_EVIDENCE_V3_1', ?::jsonb,
                     ?, ?, ?, ?::jsonb, ?::jsonb, ?, ?, ?)
             """, revisionId, validationId, gateway.getModel(), mapper.writeValueAsString(context),
                 systemPrompt, userPrompt, raw,

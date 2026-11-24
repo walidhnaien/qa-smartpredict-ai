@@ -1,1 +1,1 @@
-DefectScore is quality, not bug ratio. Distinguish epic, requirement and code coverage; Jira and Sonar bugs.
+DefectScore is a quality score, not BugRatio (bugs per 100 stories). High confidence in analysis can coexist with high release risk. Confidence is not safety. Preserve official values. Distinguish epic, requirement and code coverage; Jira and Sonar bugs.

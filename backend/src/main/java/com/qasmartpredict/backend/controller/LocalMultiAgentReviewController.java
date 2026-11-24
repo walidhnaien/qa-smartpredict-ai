@@ -22,18 +22,22 @@ public class LocalMultiAgentReviewController {
     private final String gemmaModel;
     private final String qwenModel;
     private final QaAgentSkillsService agentSkills;
+    private final com.qasmartpredict.backend.service.AiEvidenceIntelligenceService intelligence;
+    private final com.qasmartpredict.backend.service.QaEvidenceRegistryService semantic;
 
     public LocalMultiAgentReviewController(
             JdbcTemplate jdbc, ObjectMapper mapper,
             @Value("${qa.llm.ollama.base-url:http://ollama:11434}") String baseUrl,
             @Value("${qa.llm.gemma.model:gemma3:4b}") String gemmaModel,
             @Value("${qa.llm.qwen.model:qwen2.5:3b}") String qwenModel,
-            QaAgentSkillsService agentSkills) {
+            QaAgentSkillsService agentSkills, com.qasmartpredict.backend.service.AiEvidenceIntelligenceService intelligence, com.qasmartpredict.backend.service.QaEvidenceRegistryService semantic) {
         this.jdbc = jdbc;
         this.mapper = mapper;
         this.gemmaModel = gemmaModel;
         this.qwenModel = qwenModel;
         this.agentSkills = agentSkills;
+        this.intelligence = intelligence;
+        this.semantic = semantic;
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(10_000);
         factory.setReadTimeout(240_000);
@@ -68,7 +72,7 @@ public class LocalMultiAgentReviewController {
                        response_metadata->>'done_reason' AS done_reason, request_payload->>'reviewBatchId' AS batch_id,
                        created_at
                 FROM ai_review_result
-                WHERE validation_id = ? AND prompt_version IN ('MULTI_AGENT_V1','MULTI_AGENT_SKILLS_V1','MULTI_AGENT_SKILLS_V2')
+                WHERE validation_id = ? AND prompt_version IN ('MULTI_AGENT_V1','MULTI_AGENT_SKILLS_V1','MULTI_AGENT_SKILLS_V2','MULTI_AGENT_SKILLS_V2_1','MULTI_AGENT_EVIDENCE_V3','MULTI_AGENT_EVIDENCE_V3_1')
                 ORDER BY created_at DESC
                 """, validationId);
     }
@@ -83,12 +87,12 @@ public class LocalMultiAgentReviewController {
                                       String source, String candidate) {
         UUID reviewId = UUID.randomUUID();
         long start = System.nanoTime();
-        String system = agentSkills.systemFor(role, "Review the candidate against official metrics. "
-                + ("GEMMA".equals(role) ? "Focus on risks and actionable recommendations." : "Focus on metric interpretation and unsupported conclusions.")
-                + " At most two distinct short items per array, at most 15 words each; reasoning at most 35 words. Empty arrays allowed.");
+        String system = agentSkills.systemFor(role, "Return only selections: an array of exact ID:ACTION strings from the supplied options. Select every required issue. Select up to two optional investigations if useful. GEMMA must select at least one option when available. Do not output a verdict or free text.");
         JsonNode official = agentSkills.compactOfficial(readSourceMetrics(source));
-        String user = "OFFICIAL_METRICS:\n" + official + agentSkills.catalogContext(official)
-                + "\nCANDIDATE_LLAMA_ANALYSIS:\n" + candidate;
+        JsonNode candidateNode = readSourceMetrics(candidate);
+        JsonNode checks = mapper.valueToTree(intelligence.assess(official,candidateNode,List.of())).path("objectiveChecks");
+        JsonNode registry = semantic.guidedRegistry(official,checks,role);
+        String user = "OPTIONS (required=true means mandatory):\n" + registry + "\nSelect exact ID:ACTION strings. Example structure: {\"selections\":[\"ID:ACTION\"]}";
         JsonNode requestPayload = null;
         String raw = null;
         JsonNode parsed = null;
@@ -103,9 +107,9 @@ public class LocalMultiAgentReviewController {
             Map<String, Object> request = new LinkedHashMap<>();
             request.put("model", model);
             request.put("stream", false);
-            request.put("format", reviewSchema());
+            request.put("format", semantic.guidedSchema(registry,role));
             request.put("keep_alive", 0);
-            request.put("options", Map.of("temperature", 0.1, "num_ctx", 4096, "num_predict", 640,"repeat_penalty", 1.2,"repeat_last_n", 128));
+            request.put("options", Map.of("temperature", 0.1, "num_ctx", 4096, "num_predict", 256,"repeat_penalty", 1.2,"repeat_last_n", 128));
             request.put("messages", List.of(Map.of("role", "system", "content", system),
                     Map.of("role", "user", "content", user)));
             requestPayload = mapper.valueToTree(request);
@@ -119,25 +123,8 @@ public class LocalMultiAgentReviewController {
                 throw new IllegalStateException("Truncated output: token limit reached");
             parsed = mapper.reader().with(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readTree(raw);
             if (!parsed.isObject()) throw new IllegalStateException("Judge output is not a JSON object");
-            verdict = parsed.path("verdict").asText("");
-            if (!Set.of("PASS", "NEEDS_IMPROVEMENT", "FAIL").contains(verdict))
-                throw new IllegalStateException("Invalid verdict: " + verdict);
-            for (String field : List.of("strengths", "weaknesses", "missingRisks",
-                    "suggestedImprovements", "unsupportedClaims", "questionsForQaManager")) {
-                if (!parsed.path(field).isArray())
-                    throw new IllegalStateException("Missing array: " + field);
-                if (parsed.path(field).size() > 2) throw new IllegalStateException("Too many items: " + field);
-                Set<String> seen = new HashSet<>();
-                for (JsonNode item : parsed.path(field)) {
-                    if (!item.isTextual() || item.asText().isBlank() || item.asText().trim().split("\\s+").length > 15)
-                        throw new IllegalStateException("Invalid item in " + field);
-                    if (!seen.add(item.asText().trim().toLowerCase(Locale.ROOT))) throw new IllegalStateException("Duplicate item: " + field);
-                }
-            }
-            if (!parsed.path("reasoning").isTextual())
-                throw new IllegalStateException("Missing reasoning");
-            if (parsed.size() != 8 || parsed.path("reasoning").asText().trim().split("\\s+").length > 35)
-                throw new IllegalStateException("Invalid review structure or reasoning length");
+            parsed = semantic.validateGuided(parsed, registry,role);
+            verdict = parsed.path("verdict").asText();
             status = "SUCCESS";
         } catch (Exception ex) {
             error = ex.getClass().getSimpleName() + ": " + ex.getMessage();
@@ -164,7 +151,7 @@ public class LocalMultiAgentReviewController {
                   prompt_tokens, completion_tokens, total_duration_ms,
                   load_duration_ms, prompt_eval_duration_ms, eval_duration_ms,
                   execution_status, error_message
-                ) VALUES (?, ?, ?, 'OLLAMA', 'MULTI_AGENT_SKILLS_V2', 'JSON_SCHEMA', ?, ?,
+                ) VALUES (?, ?, ?, 'OLLAMA', 'MULTI_AGENT_EVIDENCE_V3_1', 'JSON_SCHEMA', ?, ?,
                   CAST(? AS jsonb), ?, CAST(? AS jsonb), CAST(? AS jsonb),
                   ?, 'NOT_RUN', 'NOT_RUN', ?, ?, ?, ?, ?, ?, ?, ?)
                 """, reviewId, validationId, model, system, user,
@@ -189,13 +176,5 @@ public class LocalMultiAgentReviewController {
         result.put("completionTokens", completionTokens);
         result.put("doneReason", metadata == null ? null : metadata.path("done_reason").asText(null));
         return result;
-    }
-    private Map<String,Object> reviewSchema() {
-        Map<String,Object> properties = new LinkedHashMap<>();
-        properties.put("verdict", Map.of("type","string","enum",List.of("PASS","NEEDS_IMPROVEMENT","FAIL")));
-        for (String field : List.of("strengths","weaknesses","missingRisks","suggestedImprovements","unsupportedClaims","questionsForQaManager"))
-            properties.put(field, Map.of("type","array","maxItems",2,"items",Map.of("type","string")));
-        properties.put("reasoning", Map.of("type","string"));
-        return Map.of("type","object","properties",properties,"required",new ArrayList<>(properties.keySet()),"additionalProperties",false);
     }
 }
