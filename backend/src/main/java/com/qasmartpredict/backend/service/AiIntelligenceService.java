@@ -19,6 +19,10 @@ public class AiIntelligenceService {
 
     public AiIntelligenceResponse analyze(
             AiIntelligenceRequest request) {
+        return analyze(request, null);
+    }
+
+    public AiIntelligenceResponse analyze(AiIntelligenceRequest request, java.util.function.Consumer<java.util.UUID> savedId) {
 
         List<String> strengths = new ArrayList<>();
         List<String> weaknesses = new ArrayList<>();
@@ -228,10 +232,11 @@ try {
                     decision,
                     risk,
                     mainRisk,
-                    confidence
+                    confidence, savedId
             );
 
 } catch (Exception e) {
+    if (savedId != null) throw new IllegalStateException("Initial analysis failed", e);
 
     System.err.println(
             "OpenAI error: " + e.getMessage()

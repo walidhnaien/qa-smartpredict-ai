@@ -1,0 +1,1 @@
+{"model":"gemma3-qa:4b","created_at":"2026-11-25T10:20:50.355296209Z","response":"OK\n","done":true,"done_reason":"stop","context":[105,2430,107,40654,1186,16119,106,236743,107,105,2028,107,7676,107],"total_duration":619729944,"load_duration":3625388,"prompt_eval_count":13,"prompt_eval_cached_count":8,"prompt_eval_duration":391067000,"eval_count":3,"eval_duration":221493000}

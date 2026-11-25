@@ -38,6 +38,10 @@ public class LocalQaAnalysisService {
             String riskLevel,
             String mainRisk,
             int confidence) {
+        return generateAnalysis(qa, releaseDecision, riskLevel, mainRisk, confidence, null);
+    }
+
+    public AiGenerativeAnalysisDto generateAnalysis(AiIntelligenceRequest qa, String releaseDecision, String riskLevel, String mainRisk, int confidence, java.util.function.Consumer<java.util.UUID> savedId) {
 
         String prompt = buildPrompt(
                 qa,
@@ -189,7 +193,7 @@ try {
 
     try {
 
-        aiValidationPersistenceService.save(
+        java.util.UUID id = aiValidationPersistenceService.save(
                 sourceMetrics,
                 json,
                 javaStatus,
@@ -203,6 +207,7 @@ try {
                 llamaDurationMs,
                 judgeDurationMs
         );
+        if (savedId != null) savedId.accept(id);
 
     } catch (Exception e) {
 
@@ -210,6 +215,7 @@ try {
                 "[AI PERSISTENCE] ERROR: "
                 + e.getMessage()
         );
+        if (savedId != null) throw e;
     }
 
     // Preserve the existing parsing failure behavior

@@ -79,6 +79,12 @@ public class LocalMultiAgentReviewController {
                 """, validationId);
     }
 
+    public Map<String,Object> reviewRole(UUID validationId, UUID batchId, String role) {
+        var row = jdbc.queryForMap("SELECT source_metrics::text AS source, llama_response::text AS candidate FROM ai_validation_result WHERE id=?", validationId);
+        String model = switch(role) { case "GEMMA" -> gemmaModel; case "QWEN" -> qwenModel; default -> throw new IllegalArgumentException("Unknown role"); };
+        return runOne(validationId,batchId,role,model,(String)row.get("source"),(String)row.get("candidate"));
+    }
+
     private JsonNode readSourceMetrics(String source) {
         try { return mapper.readTree(source); }
         catch (Exception ex) { return null; }
