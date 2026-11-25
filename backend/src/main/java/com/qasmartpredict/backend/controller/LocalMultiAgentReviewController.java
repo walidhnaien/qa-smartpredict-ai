@@ -1,6 +1,8 @@
 package com.qasmartpredict.backend.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.qasmartpredict.backend.service.QaStatementRegistryService;
+import com.qasmartpredict.backend.service.QaNliValidationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import com.qasmartpredict.backend.service.QaAgentSkillsService;
@@ -28,7 +30,7 @@ public class LocalMultiAgentReviewController {
     public LocalMultiAgentReviewController(
             JdbcTemplate jdbc, ObjectMapper mapper,
             @Value("${qa.llm.ollama.base-url:http://ollama:11434}") String baseUrl,
-            @Value("${qa.llm.gemma.model:gemma3:4b}") String gemmaModel,
+            @Value("${qa.llm.gemma.model:gemma3-qa:4b}") String gemmaModel,
             @Value("${qa.llm.qwen.model:qwen2.5:3b}") String qwenModel,
             QaAgentSkillsService agentSkills, com.qasmartpredict.backend.service.AiEvidenceIntelligenceService intelligence, com.qasmartpredict.backend.service.QaEvidenceRegistryService semantic) {
         this.jdbc = jdbc;
@@ -72,7 +74,7 @@ public class LocalMultiAgentReviewController {
                        response_metadata->>'done_reason' AS done_reason, request_payload->>'reviewBatchId' AS batch_id,
                        created_at
                 FROM ai_review_result
-                WHERE validation_id = ? AND prompt_version IN ('MULTI_AGENT_V1','MULTI_AGENT_SKILLS_V1','MULTI_AGENT_SKILLS_V2','MULTI_AGENT_SKILLS_V2_1','MULTI_AGENT_EVIDENCE_V3','MULTI_AGENT_EVIDENCE_V3_1','MULTI_AGENT_EVIDENCE_V3_3')
+                WHERE validation_id = ? AND prompt_version IN ('MULTI_AGENT_V1','MULTI_AGENT_SKILLS_V1','MULTI_AGENT_SKILLS_V2','MULTI_AGENT_SKILLS_V2_1','MULTI_AGENT_EVIDENCE_V3','MULTI_AGENT_EVIDENCE_V3_1','MULTI_AGENT_EVIDENCE_V3_3','MULTI_AGENT_EVIDENCE_V3_4','MULTI_AGENT_EVIDENCE_V3_4_1','MULTI_AGENT_EVIDENCE_V3_4_2','MULTI_AGENT_EVIDENCE_V3_4_3','MULTI_AGENT_NLI_V3_4_4','MULTI_AGENT_NLI_V3_4_5','MULTI_AGENT_NLI_V3_4_6')
                 ORDER BY created_at DESC
                 """, validationId);
     }
@@ -87,12 +89,13 @@ public class LocalMultiAgentReviewController {
                                       String source, String candidate) {
         UUID reviewId = UUID.randomUUID();
         long start = System.nanoTime();
-        String system = agentSkills.systemFor(role, "Return only selections: an array of exact ID:ACTION strings from the supplied options. Select every required issue. Select up to two optional investigations if useful. GEMMA must select at least one option when available. Do not output a verdict or free text.");
+        String system = agentSkills.nliSystem(role);
         JsonNode official = agentSkills.compactOfficial(readSourceMetrics(source));
         JsonNode candidateNode = readSourceMetrics(candidate);
-        JsonNode checks = mapper.valueToTree(intelligence.assess(official,candidateNode,List.of())).path("objectiveChecks");
-        JsonNode registry = semantic.guidedRegistry(official,checks,role);
-        String user = "OPTIONS (required=true means mandatory):\n" + registry + "\nSelect exact ID:ACTION strings. Example structure: {\"selections\":[\"ID:ACTION\"]}";
+        JsonNode fullRegistry = QaStatementRegistryService.build(mapper,candidateNode);
+        JsonNode statements = QaStatementRegistryService.forRole(mapper,fullRegistry,role);
+        JsonNode pairs = QaNliValidationService.pairs(mapper,statements,official,agentSkills.metricsCatalog(),role);
+        String user = QaNliValidationService.prompt(pairs);
         JsonNode requestPayload = null;
         String raw = null;
         JsonNode parsed = null;
@@ -103,19 +106,24 @@ public class LocalMultiAgentReviewController {
         Long durationMs;
         Integer promptTokens = null, completionTokens = null;
         Long loadNs = null, promptNs = null, evalNs = null;
+        String phase = "REQUEST";
         try {
             Map<String, Object> request = new LinkedHashMap<>();
             request.put("model", model);
             request.put("stream", false);
-            request.put("format", semantic.guidedSchema(registry,role));
+            request.put("format", QaNliValidationService.schema(pairs));
             request.put("keep_alive", 0);
-            request.put("options", Map.of("temperature", 0.1, "num_ctx", 4096, "num_predict", 256,"repeat_penalty", 1.2,"repeat_last_n", 128));
+            request.put("options", Map.of("temperature", 0.1, "num_ctx", 4096, "num_predict", 256,"repeat_penalty", 1.0));
             request.put("messages", List.of(Map.of("role", "system", "content", system),
                     Map.of("role", "user", "content", user)));
             requestPayload = mapper.valueToTree(request);
-            metadata = ollama.post().uri("/api/chat")
+            if (pairs.isEmpty()) throw new IllegalStateException("No matched NLI pairs; review not performed");
+            phase = "OLLAMA_CALL";
+            String responseBody = ollama.post().uri("/api/chat")
                     .contentType(MediaType.APPLICATION_JSON).body(request)
-                    .retrieve().body(JsonNode.class);
+                    .retrieve().body(String.class);
+            phase = "RESPONSE_PARSE";
+            metadata = responseBody == null ? null : mapper.readTree(responseBody);
             if (metadata == null) throw new IllegalStateException("Empty Ollama response");
             raw = metadata.path("message").path("content").asText("");
             if (raw.isBlank()) throw new IllegalStateException("Empty judge output");
@@ -123,11 +131,13 @@ public class LocalMultiAgentReviewController {
                 throw new IllegalStateException("Truncated output: token limit reached");
             parsed = mapper.reader().with(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readTree(raw);
             if (!parsed.isObject()) throw new IllegalStateException("Judge output is not a JSON object");
-            parsed = semantic.validateGuided(parsed, registry,role);
+            phase = "DISCOVERY_VALIDATION";
+            parsed = QaNliValidationService.validate(mapper, parsed, pairs);
             verdict = parsed.path("verdict").asText();
             status = "SUCCESS";
+            phase = "COMPLETE";
         } catch (Exception ex) {
-            error = ex.getClass().getSimpleName() + ": " + ex.getMessage();
+            error = phase + ": " + ex.getClass().getSimpleName() + ": " + ex.getMessage();
         } finally {
             durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
         }
@@ -141,6 +151,8 @@ public class LocalMultiAgentReviewController {
         if (metadata != null && metadata.isObject()) ((com.fasterxml.jackson.databind.node.ObjectNode) metadata).put("reviewBatchId", batchId.toString());
         if (requestPayload == null) requestPayload = mapper.createObjectNode();
         ((com.fasterxml.jackson.databind.node.ObjectNode) requestPayload).put("reviewBatchId", batchId.toString());
+        ((com.fasterxml.jackson.databind.node.ObjectNode) requestPayload).put("reviewerRole",role).set("statementRegistry",statements);
+        ((com.fasterxml.jackson.databind.node.ObjectNode) requestPayload).put("executionPhase",phase).set("matchedPairs",pairs);
         // Append-only: never update existing historical reviewer records.
         jdbc.update("""
                 INSERT INTO ai_review_result (
@@ -151,7 +163,7 @@ public class LocalMultiAgentReviewController {
                   prompt_tokens, completion_tokens, total_duration_ms,
                   load_duration_ms, prompt_eval_duration_ms, eval_duration_ms,
                   execution_status, error_message
-                ) VALUES (?, ?, ?, 'OLLAMA', 'MULTI_AGENT_EVIDENCE_V3_3', 'JSON_SCHEMA', ?, ?,
+                ) VALUES (?, ?, ?, 'OLLAMA', 'MULTI_AGENT_NLI_V3_4_6', 'JSON_SCHEMA', ?, ?,
                   CAST(? AS jsonb), ?, CAST(? AS jsonb), CAST(? AS jsonb),
                   ?, 'NOT_RUN', 'NOT_RUN', ?, ?, ?, ?, ?, ?, ?, ?)
                 """, reviewId, validationId, model, system, user,
@@ -174,6 +186,18 @@ public class LocalMultiAgentReviewController {
         result.put("error", error);
         result.put("promptTokens", promptTokens);
         result.put("completionTokens", completionTokens);
+        result.put("statementRegistry",statements);
+        result.put("matchedPairs",pairs);
+        result.put("matchedClaimCount",pairs.size());
+        result.put("eligibleClaimCount",com.qasmartpredict.backend.service.QaAtomicClaimService.extract(mapper,statements).size());
+        java.util.Set<String> matchedFields = new java.util.HashSet<>();
+        pairs.forEach(pair -> matchedFields.add(pair.path("parentStatementId").asText()));
+        result.put("matchedFieldCount",matchedFields.size());
+        result.put("eligibleFieldCount",statements.size());
+        result.put("executionPhase", phase);
+        result.put("loadDurationMs",loadNs == null ? null : TimeUnit.NANOSECONDS.toMillis(loadNs));
+        result.put("promptEvalDurationMs",promptNs == null ? null : TimeUnit.NANOSECONDS.toMillis(promptNs));
+        result.put("evalDurationMs",evalNs == null ? null : TimeUnit.NANOSECONDS.toMillis(evalNs));
         result.put("doneReason", metadata == null ? null : metadata.path("done_reason").asText(null));
         return result;
     }

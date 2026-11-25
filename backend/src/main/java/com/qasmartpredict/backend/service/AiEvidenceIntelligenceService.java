@@ -83,10 +83,25 @@ public class AiEvidenceIntelligenceService {
                 }
             }
         }
+        List<Map<String,Object>> nliAssessments = new ArrayList<>();
+        Map<String,Map<String,Object>> discoveries = new LinkedHashMap<>();
+        for(JsonNode wrapper:reviews) {
+            String model=wrapper.path("reviewerModel").asText("unknown");
+            for(JsonNode a:wrapper.path("analysis").path("assessments")) nliAssessments.add(item("model",model,"assessment",a));
+            for(JsonNode f:wrapper.path("analysis").path("newFindings")) {
+                // Only expose verified quotes; check against persisted candidate again.
+                if(!"QUOTE_VERIFIED".equals(f.path("evidenceStatus").asText())) continue;
+                if(!candidate.at(f.path("sourcePath").asText()).asText().contains(f.path("evidence").asText())) continue;
+                String key=f.path("sourcePath").asText()+"|"+f.path("evidence").asText()+"|"+f.path("hypothesis").asText();
+                Map<String,Object> entry=discoveries.computeIfAbsent(key,k->item("sourcePath",f.path("sourcePath").asText(),"evidence",f.path("evidence").asText(),"status","HUMAN_REVIEW_REQUIRED","contributions",new ArrayList<Map<String,Object>>()));
+                @SuppressWarnings("unchecked") List<Map<String,Object>> contributions=(List<Map<String,Object>>)entry.get("contributions");
+                contributions.add(item("model",model,"category",f.path("category").asText(),"reason",f.path("reason").asText(),"relation",f.path("relation").asText(),"referenceId",f.path("referenceId").asText(),"premise",f.path("premise").asText(),"hypothesis",f.path("hypothesis").asText(),"claimType",f.path("claimType").asText()));
+            }
+        }
         actions.sort(Comparator.comparingInt(a -> (int)a.get("priority")));
         List<Map<String,Object>> proposals = agentActionCandidates(source, candidate, reviews);
         Map<String,Object> agentAssessment = recommendationService.evaluate(source, proposals);
-        return item("objectiveChecks", checks, "reviewerChecks", reviewerChecks, "prioritizedActions", actions,
+        return item("objectiveChecks", checks, "reviewerChecks", reviewerChecks, "discoveryFindings", discoveries.values(), "nliAssessments", nliAssessments, "prioritizedActions", actions,
                 "hypotheses", hypotheses, "agentActionCandidates", proposals, "agentRecommendationAssessment", agentAssessment, "dataGaps", dataGaps(source), "officialDecision", source.path("releaseDecision").asText("UNKNOWN"),
                 "certification", "ONLY_DETERMINISTIC_FIELDS_ARE_OFFICIAL", "semanticReviewStatus", "HUMAN_REVIEW_REQUIRED");
     }
@@ -132,7 +147,6 @@ public class AiEvidenceIntelligenceService {
         if (source.path("uncoveredRequirements").asInt(0)>0) gaps.add("Identity and criticality of uncovered requirements are not supplied in aggregate metrics");
         if (source.path("codeSmells").asInt(0)>0) gaps.add("Code-smell hotspot locations and links to defects are not supplied");
         if (source.has("confidence")) gaps.add("Meaning and calculation method of confidence must be documented before using it as evidence of reliability");
-        if (source.has("defectScore")) gaps.add("DefectScore formula and scale direction must be documented");
         return gaps;
     }
     private static Map<String,Object> action(int priority, String category, String action, String evidence, String done) {

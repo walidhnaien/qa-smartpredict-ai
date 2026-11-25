@@ -17,7 +17,7 @@ import java.util.Map;
 /** Shared governance + skill loader. It does not replace deterministic Java validation. */
 @Service
 public class QaAgentSkillsService {
-    public static final String POLICY_VERSION = "QA_AGENT_POLICY_V3_3";
+    public static final String POLICY_VERSION = "QA_AGENT_POLICY_V3_4_6";
     private final QaMetricsCatalogService metrics;
     private final String globalPolicy;
     private final Map<String,String> skills;
@@ -27,7 +27,7 @@ public class QaAgentSkillsService {
         globalPolicy = read("qa-agents/global-policy.md");
         Map<String,String> loaded = new LinkedHashMap<>();
         for (String name : List.of("metric-interpretation", "qa-analysis", "independent-review",
-                "critique-resolution", "quality-validation")) {
+                "critique-resolution", "quality-validation", "release-governance-audit", "metric-consistency-audit", "governance-nli", "metric-nli", "reference-matching", "semantic-validation", "atomic-claim-extraction", "claim-classification")) {
             loaded.put(name, read("qa-agents/skills/" + name + "/SKILL.md"));
         }
         this.skills = Map.copyOf(loaded);
@@ -47,7 +47,8 @@ public class QaAgentSkillsService {
     public String systemFor(String role, String existingTaskInstructions) {
         List<String> enabled = switch (role) {
             case "LLAMA_INITIAL" -> List.of("metric-interpretation", "qa-analysis");
-            case "GEMMA", "QWEN" -> List.of("metric-interpretation", "independent-review");
+            case "GEMMA" -> List.of("release-governance-audit");
+            case "QWEN" -> List.of("metric-consistency-audit");
             case "LLAMA_REVISION" -> List.of("metric-interpretation", "critique-resolution", "quality-validation");
             default -> throw new IllegalArgumentException("Unsupported agent role: " + role);
         };
@@ -60,6 +61,32 @@ public class QaAgentSkillsService {
         }
         out.append("\nTASK-SPECIFIC INSTRUCTIONS (follow global constraints):\n")
                 .append(existingTaskInstructions);
+        return out.toString();
+    }
+
+    public String nliSystem(String role) {
+        return skills.get(role.equals("GEMMA") ? "governance-nli" : "metric-nli");
+    }
+    public String reviewerSystem(String role) {
+        String skill = switch(role) {
+            case "GEMMA" -> "release-governance-audit";
+            case "QWEN" -> "metric-consistency-audit";
+            default -> throw new IllegalArgumentException("Unknown reviewer role");
+        };
+        return "Official facts and decision are authoritative. Never invent evidence. Human approval required. "
+                + skills.get(skill).trim() + " Return only findings with statementId and reason. "
+                + "At most four findings; aim for 12 words per reason. Flag actual errors only. Empty findings is valid.";
+    }
+    public String reviewerFacts(JsonNode official, String role) {
+        ObjectNode facts=compactOfficial(official);
+        // Governance retains numerical facts as context for unsupported claims.
+        if (role.equals("GEMMA")) facts.remove(List.of("duplication","feedbackScore","incidentScore","sonarCoverage","codeSmells","bugs","vulnerabilities","sonarScore","totalStories","totalBugs","bugRatio","totalRequirements","coveredRequirements","uncoveredRequirements","coverageScore"));
+        StringBuilder out=new StringBuilder("Official facts: ").append(facts);
+        out.append(". Confidence is not release safety. Recommendation is not approval.");
+        if (role.equals("QWEN")) {
+            out.append(initialCatalogContext(official));
+            out.append("Requirement coverage = covered requirements / total requirements; distinct from epic and code coverage. Jira bugs and Sonar bugs are distinct.");
+        }
         return out.toString();
     }
 

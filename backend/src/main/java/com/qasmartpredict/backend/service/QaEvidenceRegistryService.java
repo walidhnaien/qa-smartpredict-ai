@@ -81,6 +81,95 @@ public class QaEvidenceRegistryService {
         result.put("requiredIssues",required); result.put("coveredIssues",covered.size()); if(required>0)result.put("issueCoverage",100);else result.putNull("issueCoverage");
         result.put("verdict",seen.isEmpty()?"PASS":"NEEDS_IMPROVEMENT"); result.put("reasoning","Java validated selections and mandatory coverage; relevance and actual corrections require review."); return result;
     }
+    public Map<String,Object> hybridSchema(JsonNode registry,String role) {
+        Map<String,Object> base=guidedSchema(registry,role);
+        Map<String,Object> props=new LinkedHashMap<>();
+        props.put("selections", ((Map<?,?>)base.get("properties")).get("selections"));
+        props.put("newFindings",Map.of("type","array","maxItems",2,"items",Map.of(
+            "type","object","additionalProperties",false,"required",List.of("category","sourcePath","evidence","reason"),
+            "properties",Map.of("category",Map.of("type","string","enum",AiDiscoveryValidationService.CATEGORIES),
+            "sourcePath",Map.of("type","string","maxLength",120),"evidence",Map.of("type","string","maxLength",240),
+            "reason",Map.of("type","string","maxLength",160)))));
+        return Map.of("type","object","additionalProperties",false,"required",List.of("selections","newFindings"),"properties",props);
+    }
+    public ObjectNode validateHybrid(JsonNode raw,JsonNode registry,String role,JsonNode candidate) {
+        if(!raw.isObject() || raw.size()!=2 || !raw.path("newFindings").isArray() || raw.path("newFindings").size()>2)
+            throw new IllegalStateException("Invalid hybrid structure");
+        ObjectNode guided=mapper.createObjectNode(); guided.set("selections",raw.path("selections"));
+        ObjectNode result=validateGuided(guided,registry,role);
+        var accepted=result.putArray("newFindings"); var rejected=result.putArray("rejectedDiscoveries");
+        Set<String> seen=new HashSet<>();
+        for(JsonNode finding:raw.path("newFindings")) {
+            String error=AiDiscoveryValidationService.error(finding,candidate);
+            if(error==null && !seen.add(finding.path("sourcePath").asText()+"|"+finding.path("evidence").asText())) error="DUPLICATE_EVIDENCE";
+            if(error!=null) { var item=rejected.addObject(); item.set("finding",finding); item.put("reason",error); continue; }
+            ObjectNode item=(ObjectNode)finding.deepCopy(); item.put("evidenceStatus","QUOTE_VERIFIED");
+            item.put("semanticStatus","HUMAN_REVIEW_REQUIRED"); accepted.add(item);
+        }
+        if(!accepted.isEmpty()) result.put("verdict","NEEDS_IMPROVEMENT");
+        return result;
+    }
+    public Map<String,Object> indexedSchema(JsonNode registry,String role,JsonNode statements) {
+        List<String> ids=new ArrayList<>(); statements.fieldNames().forEachRemaining(ids::add);
+        Map<String,Object> base=guidedSchema(registry,role);
+        Map<String,Object> props=new LinkedHashMap<>();
+        props.put("selections", ((Map<?,?>)base.get("properties")).get("selections"));
+        props.put("newFindings",Map.of("type","array","maxItems",ids.isEmpty()?0:2,"items",Map.of(
+            "type","object","additionalProperties",false,"required",List.of("category","statementId","reason"),
+            "properties",Map.of("category",Map.of("type","string","enum",AiDiscoveryValidationService.CATEGORIES),
+            "statementId",Map.of("type","string","enum",ids.isEmpty()?List.of("NONE"):ids),
+            "reason",Map.of("type","string","maxLength",160)))));
+        return Map.of("type","object","additionalProperties",false,"required",List.of("selections","newFindings"),"properties",props);
+    }
+    public ObjectNode validateIndexed(JsonNode raw,JsonNode registry,String role,JsonNode statements) {
+        if(!raw.isObject() || raw.size()!=2 || !raw.path("newFindings").isArray() || raw.path("newFindings").size()>2)
+            throw new IllegalStateException("Invalid hybrid structure");
+        ObjectNode guided=mapper.createObjectNode(); guided.set("selections",raw.path("selections"));
+        ObjectNode result=validateGuided(guided,registry,role);
+        var accepted=result.putArray("newFindings"); var rejected=result.putArray("rejectedDiscoveries");
+        Set<String> seen=new HashSet<>();
+        for(JsonNode finding:raw.path("newFindings")) {
+            String error=QaStatementRegistryService.error(finding,statements);
+            if(error==null && !seen.add(finding.path("statementId").asText())) error="DUPLICATE_EVIDENCE";
+            if(error!=null) { var item=rejected.addObject(); item.set("finding",finding); item.put("reason",error); continue; }
+            ObjectNode item=QaStatementRegistryService.resolve(finding,statements); item.put("evidenceStatus","QUOTE_VERIFIED");
+            item.put("semanticStatus","HUMAN_REVIEW_REQUIRED"); accepted.add(item);
+        }
+        if(!accepted.isEmpty()) result.put("verdict","NEEDS_IMPROVEMENT");
+        return result;
+    }
+    public Map<String,Object> discoverySchema(JsonNode statements) {
+        List<String> ids=new ArrayList<>(); statements.fieldNames().forEachRemaining(ids::add);
+        return Map.of("type","object","additionalProperties",false,"required",List.of("findings"),"properties",Map.of(
+            "findings",Map.of("type","array","maxItems",ids.isEmpty()?0:4,"items",Map.of(
+                "type","object","additionalProperties",false,"required",List.of("statementId","reason"),
+                "properties",Map.of("statementId",Map.of("type","string","enum",ids.isEmpty()?List.of("NONE"):ids),
+                    "reason",Map.of("type","string","minLength",1,"maxLength",160))))));
+    }
+    public ObjectNode validateDiscovery(JsonNode raw, JsonNode statements) {
+        if(!raw.isObject() || raw.size()!=1 || !raw.path("findings").isArray() || raw.path("findings").size()>4)
+            throw new IllegalStateException("Invalid discovery structure");
+        ObjectNode result=mapper.createObjectNode();
+        for(String field:List.of("findings","strengths","weaknesses","missingRisks","unsupportedClaims","questionsForQaManager","suggestedImprovements")) result.putArray(field);
+        var accepted=result.putArray("newFindings"); var rejected=result.putArray("rejectedDiscoveries");
+        Set<String> seen=new HashSet<>();
+        for(JsonNode f:raw.path("findings")) {
+            String error=null;
+            if(!f.isObject() || f.size()!=2 || !f.path("statementId").isTextual() || !f.path("reason").isTextual() || f.path("reason").asText().isBlank()) error="INVALID_STRUCTURE";
+            else if(!statements.has(f.path("statementId").asText())) error="UNKNOWN_STATEMENT";
+            else if(f.path("reason").asText().length()>160) error="INVALID_REASON_LENGTH";
+            else if(!seen.add(f.path("statementId").asText())) error="DUPLICATE_EVIDENCE";
+            if(error!=null) { var item=rejected.addObject(); item.set("finding",f); item.put("reason",error); continue; }
+            ObjectNode item=(ObjectNode)f.deepCopy(); item.put("category","OTHER");
+            item=QaStatementRegistryService.resolve(item,statements);
+            item.put("evidenceStatus","QUOTE_VERIFIED"); item.put("semanticStatus","HUMAN_REVIEW_REQUIRED");
+            if(f.path("reason").asText().trim().split("\\s+").length>12) item.putArray("validationWarnings").add("REASON_WORD_TARGET_EXCEEDED");
+            accepted.add(item);
+        }
+        result.put("verdict",accepted.isEmpty()?(rejected.isEmpty()?"PASS":"NEEDS_IMPROVEMENT"):"NEEDS_IMPROVEMENT");
+        result.put("reasoning","Discovery only; no guided selection. Semantic relevance requires human review.");
+        return result;
+    }
     private static final Map<String,String> ACTIONS=Map.of(
         "CLARIFY_METRIC","Clarify the metric using its official definition.",
         "CHECK_SEVERITY","Obtain defect severity and impact evidence.",

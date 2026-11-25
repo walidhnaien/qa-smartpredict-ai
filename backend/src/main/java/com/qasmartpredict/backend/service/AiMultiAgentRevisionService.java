@@ -137,6 +137,8 @@ public class AiMultiAgentRevisionService {
             ObjectNode revision = assembled.putObject("revision");
             for (String key : List.of("correctedIssues", "acceptedCritiques", "rejectedCritiques", "unverifiedClaims", "residualRisks", "requiredEvidence"))
                 revision.putArray(key);
+            revision.set("discoveryFindings", intelligence.path("discoveryFindings"));
+            revision.set("nliAssessments", intelligence.path("nliAssessments"));
             revised = assembled;
             validation = new LinkedHashMap<>(validator.validate(official, v1, revised));
             int total=0, resolved=0;
@@ -162,6 +164,7 @@ public class AiMultiAgentRevisionService {
             validation.put("issueResolution",resolution);
             validation.put("detectedIssues",total); validation.put("resolvedIssues",resolved);
             validation.put("issueResolutionRate",total==0 ? null : 100.0*resolved/total);
+            validation.put("semanticTraceability", QaSemanticTraceability.build(mapper, intelligence.path("nliAssessments"), v1, revised));
             validation.put("semanticQualityCertified",false);
             validation.put("humanReviewRequired",true);
             if (resolved<total || actions.isEmpty()) validation.put("status","REQUIRES_REVIEW");
@@ -176,7 +179,7 @@ public class AiMultiAgentRevisionService {
               (id, validation_id, revision_version, model, prompt_version, input_snapshot,
                system_prompt, user_prompt, raw_response, revised_analysis, validation_report,
                execution_status, error_message, duration_ms)
-            VALUES (?, ?, 'LLAMA_V2', ?, 'REVISION_AGENT_CONTROLLED_V3_3', ?::jsonb,
+            VALUES (?, ?, 'LLAMA_V2', ?, 'REVISION_AGENT_CONTROLLED_V3_4_4', ?::jsonb,
                     ?, ?, ?, ?::jsonb, ?::jsonb, ?, ?, ?)
             """, revisionId, validationId, gateway.getModel(), mapper.writeValueAsString(audit),
                 systemPrompt, userPrompt, raw,
@@ -191,6 +194,7 @@ public class AiMultiAgentRevisionService {
         result.put("durationMs", durationMs);
         result.put("officialDecision", official.path("releaseDecision").asText());
         result.put("sameBatchVerified", true);
+        result.put("batchId", evidence.get("batchId"));
         result.put("revisedAnalysis", revised);
         result.put("validationReport", validation);
         result.put("error", error);

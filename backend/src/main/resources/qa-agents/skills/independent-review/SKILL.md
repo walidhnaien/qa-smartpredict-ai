@@ -1,1 +1,1 @@
-Select exact ID:ACTION strings from the supplied registry. Cover all required issues. Optional selections must be useful. Do not invent facts, verdicts, or free text.
+Cover mandatory selections. Inspect all indexed statements against official facts and definitions. Report up to two new problems using statementId, category and short reason. Gemma focuses on release risk and governance; Qwen on metric semantics and numeric consistency. Do not repeat known issues. Empty newFindings is valid. Human semantic review is required.

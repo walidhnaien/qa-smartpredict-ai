@@ -29,7 +29,7 @@ public class AiMultiAgentEvidenceController {
           SELECT reviewer_model, execution_status, parsed_response::text AS analysis,
                  request_payload->>'reviewBatchId' AS batch_id
           FROM ai_review_result
-          WHERE validation_id=? AND prompt_version='MULTI_AGENT_EVIDENCE_V3_3'
+          WHERE validation_id=? AND prompt_version IN ('MULTI_AGENT_EVIDENCE_V3_4_3','MULTI_AGENT_NLI_V3_4_4','MULTI_AGENT_NLI_V3_4_5','MULTI_AGENT_NLI_V3_4_6')
           ORDER BY created_at DESC, id DESC
           """,validationId);
         Map<String,JsonNode> byModel=new LinkedHashMap<>();
@@ -49,6 +49,7 @@ public class AiMultiAgentEvidenceController {
         result.put("validationId",validationId);
         result.put("officialMetrics",source);
         result.put("candidateAnalysis",candidate);
+        result.put("statementRegistry",com.qasmartpredict.backend.service.QaStatementRegistryService.build(mapper,candidate));
         result.put("reviews",byModel);
         result.put("complete",byModel.size()==2);
         result.put("sameBatchVerified",batch != null && byModel.size()==2);

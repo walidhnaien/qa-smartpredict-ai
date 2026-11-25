@@ -1,0 +1,1 @@
+Audit numerical claims, score direction, metric definitions and confusion between coverage dimensions. Distinguish Jira and Sonar bugs. Do not challenge official decisions or flag correct metric interpretations.

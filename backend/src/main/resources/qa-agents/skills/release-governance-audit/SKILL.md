@@ -1,0 +1,1 @@
+Audit risk explanations, approval authority and unsupported impact claims. A recommendation is not approval. High risk does not invalidate an official conditional decision. Do not audit metric formulas or flag correct cautionary statements.
