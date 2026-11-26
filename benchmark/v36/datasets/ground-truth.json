@@ -7,7 +7,7 @@
     "expectedAlert": true,
     "referenceKey": "qis",
     "referenceValue": 68.89,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "Conflicts with the official value or definition."
   },
   {
@@ -18,7 +18,7 @@
     "expectedAlert": true,
     "referenceKey": "defectScore",
     "referenceValue": 22.22222222222223,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "Conflicts with the official value or definition."
   },
   {
@@ -29,7 +29,7 @@
     "expectedAlert": true,
     "referenceKey": "bugRatio",
     "referenceValue": 77.77777777777777,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "Conflicts with the official value or definition."
   },
   {
@@ -40,7 +40,7 @@
     "expectedAlert": true,
     "referenceKey": "defectScore",
     "referenceValue": 22.22222222222223,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "Conflicts with the official value or definition."
   },
   {
@@ -51,7 +51,7 @@
     "expectedAlert": true,
     "referenceKey": "bugs",
     "referenceValue": 4,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "Conflicts with the official value or definition."
   },
   {
@@ -62,7 +62,7 @@
     "expectedAlert": true,
     "referenceKey": "riskLevel",
     "referenceValue": "HIGH",
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "Conflicts with the official value or definition."
   },
   {
@@ -73,7 +73,7 @@
     "expectedAlert": true,
     "referenceKey": "riskLevel",
     "referenceValue": "HIGH",
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "Conflicts with the official value or definition."
   },
   {
@@ -84,19 +84,19 @@
     "expectedAlert": true,
     "referenceKey": "mainRisk",
     "referenceValue": "DEFECT_QUALITY",
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "Conflicts with the official value or definition."
   },
   {
     "caseId": "b4a4b16bc62f",
     "designId": "RC04",
     "targetPath": "/releaseRationale",
-    "expectedRelation": "CONTRADICTED",
+    "expectedRelation": "NOT_ESTABLISHED",
     "expectedAlert": true,
     "referenceKey": "riskLevel",
     "referenceValue": "HIGH",
-    "annotationStatus": "PROPOSED",
-    "rationale": "Conflicts with the official value or definition."
+    "annotationStatus": "APPROVED",
+    "rationale": "High risk alone does not establish a positive justification for release."
   },
   {
     "caseId": "75d9d057ace6",
@@ -106,8 +106,8 @@
     "expectedAlert": true,
     "referenceKey": "confidence",
     "referenceValue": 95,
-    "annotationStatus": "PROPOSED",
-    "rationale": "The supplied evidence does not establish this assertion."
+    "annotationStatus": "APPROVED",
+    "rationale": "Confidence alone does not establish release safety; the claim is an unsupported guarantee."
   },
   {
     "caseId": "191dafad0557",
@@ -117,7 +117,7 @@
     "expectedAlert": true,
     "referenceKey": "releaseDecision",
     "referenceValue": "GO_WITH_RISK",
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "Conflicts with the official value or definition."
   },
   {
@@ -128,7 +128,7 @@
     "expectedAlert": true,
     "referenceKey": "releaseDecision",
     "referenceValue": "GO_WITH_RISK",
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "The supplied evidence does not establish this assertion."
   },
   {
@@ -138,9 +138,9 @@
     "expectedRelation": "CONTRADICTED",
     "expectedAlert": true,
     "referenceKey": "governance",
-    "referenceValue": null,
-    "annotationStatus": "PROPOSED",
-    "rationale": "Conflicts with the official value or definition."
+    "referenceValue": "Java values and decisions are authoritative. Catalog defines semantics. Never invent evidence, severity or impact. Confidence is not proof of safety. Distinguish facts, hypotheses and unknowns. Human approval remains required.",
+    "annotationStatus": "APPROVED",
+    "rationale": "The project governance policy explicitly requires human approval."
   },
   {
     "caseId": "89ad30b49bba",
@@ -150,7 +150,7 @@
     "expectedAlert": true,
     "referenceKey": "confidence",
     "referenceValue": 95,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "The supplied evidence does not establish this assertion."
   },
   {
@@ -161,7 +161,7 @@
     "expectedAlert": true,
     "referenceKey": "releaseDecision",
     "referenceValue": "GO_WITH_RISK",
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "Conflicts with the official value or definition."
   },
   {
@@ -172,7 +172,7 @@
     "expectedAlert": true,
     "referenceKey": "coverageScore",
     "referenceValue": 80,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "Conflicts with the official value or definition."
   },
   {
@@ -183,8 +183,11 @@
     "expectedAlert": true,
     "referenceKey": "coverageScore",
     "referenceValue": 80,
-    "annotationStatus": "PROPOSED",
-    "rationale": "Conflicts with the official value or definition."
+    "annotationStatus": "APPROVED",
+    "rationale": "Code coverage and functional coverage measure different things; equal values would not establish equivalence.",
+    "additionalReferences": {
+      "sonarCoverage": 72.5
+    }
   },
   {
     "caseId": "ec48f81b2799",
@@ -194,7 +197,7 @@
     "expectedAlert": true,
     "referenceKey": "coveredRequirements",
     "referenceValue": 4,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "Conflicts with the official value or definition."
   },
   {
@@ -205,7 +208,7 @@
     "expectedAlert": true,
     "referenceKey": "uncoveredRequirements",
     "referenceValue": 1,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "The supplied evidence does not establish this assertion."
   },
   {
@@ -216,7 +219,7 @@
     "expectedAlert": true,
     "referenceKey": "coverageScore",
     "referenceValue": 80,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "The supplied evidence does not establish this assertion."
   },
   {
@@ -227,7 +230,7 @@
     "expectedAlert": true,
     "referenceKey": "totalBugs",
     "referenceValue": 7,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "The supplied evidence does not establish this assertion."
   },
   {
@@ -238,7 +241,7 @@
     "expectedAlert": true,
     "referenceKey": "totalBugs",
     "referenceValue": 7,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "The supplied evidence does not establish this assertion."
   },
   {
@@ -249,7 +252,7 @@
     "expectedAlert": true,
     "referenceKey": "codeSmells",
     "referenceValue": 35,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "The supplied evidence does not establish this assertion."
   },
   {
@@ -260,7 +263,7 @@
     "expectedAlert": true,
     "referenceKey": "qis",
     "referenceValue": 68.89,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "The supplied evidence does not establish this assertion."
   },
   {
@@ -271,7 +274,7 @@
     "expectedAlert": true,
     "referenceKey": "vulnerabilities",
     "referenceValue": 1,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "The supplied evidence does not establish this assertion."
   },
   {
@@ -282,7 +285,7 @@
     "expectedAlert": false,
     "referenceKey": "qis",
     "referenceValue": 68.89,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "No anomaly in this qualified statement or recommendation."
   },
   {
@@ -293,7 +296,7 @@
     "expectedAlert": false,
     "referenceKey": "defectScore",
     "referenceValue": 22.22222222222223,
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "No anomaly in this qualified statement or recommendation."
   },
   {
@@ -304,29 +307,29 @@
     "expectedAlert": false,
     "referenceKey": "releaseDecision",
     "referenceValue": "GO_WITH_RISK",
-    "annotationStatus": "PROPOSED",
+    "annotationStatus": "APPROVED",
     "rationale": "No anomaly in this qualified statement or recommendation."
   },
   {
     "caseId": "6b64da325feb",
     "designId": "CL04",
     "targetPath": "/priorityActions/0/expectedImpact",
-    "expectedRelation": "SUPPORTED",
+    "expectedRelation": "NOT_APPLICABLE",
     "expectedAlert": false,
     "referenceKey": "uncoveredRequirements",
     "referenceValue": 1,
-    "annotationStatus": "PROPOSED",
-    "rationale": "No anomaly in this qualified statement or recommendation."
+    "annotationStatus": "APPROVED",
+    "rationale": "Explicitly unverified hypothesis."
   },
   {
     "caseId": "f3ae93662a48",
     "designId": "CL05",
     "targetPath": "/priorityActions/0/action",
-    "expectedRelation": "SUPPORTED",
+    "expectedRelation": "NOT_APPLICABLE",
     "expectedAlert": false,
     "referenceKey": "totalBugs",
     "referenceValue": 7,
-    "annotationStatus": "PROPOSED",
-    "rationale": "No anomaly in this qualified statement or recommendation."
+    "annotationStatus": "APPROVED",
+    "rationale": "Evidence-based recommendation, not a factual assertion."
   }
 ]
