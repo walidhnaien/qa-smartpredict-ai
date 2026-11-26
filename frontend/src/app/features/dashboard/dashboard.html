@@ -4,10 +4,66 @@
   <button
     type="button"
     class="export-pdf-btn"
+    [disabled]="!canExportPdf"
+    [attr.aria-busy]="pdfExporting"
     (click)="exportPdf()"
   >
-    Exporter PDF
+    {{ pdfExporting ? 'Generating report...' : 'Export Quality Report' }}
   </button>
+
+  <button
+    type="button"
+    class="export-pdf-btn screenshot-pdf-btn"
+    [disabled]="!canExportDashboardPdf"
+    [attr.aria-busy]="screenshotExporting"
+    (click)="exportDashboardPdf()">
+    {{ screenshotExporting
+      ? 'Capturing dashboard...'
+      : 'Export Dashboard PDF' }}
+  </button>
+
+  <p *ngIf="screenshotExporting"
+     role="status"
+     aria-live="polite">
+    Generating visual dashboard snapshot...
+  </p>
+
+  <div *ngIf="screenshotExportError"
+       class="analysis-error"
+       role="alert">
+    {{ screenshotExportError }}
+  </div>
+
+  <div *ngIf="screenshotExportMessage"
+       class="analysis-success"
+       role="status"
+       aria-live="polite">
+    {{ screenshotExportMessage }}
+  </div>
+
+  <p *ngIf="pdfExporting"
+     role="status"
+     aria-live="polite">
+    Collecting and validating report data...
+  </p>
+
+  <p *ngIf="!canExportPdf && !pdfExporting && !screenshotExporting"
+     role="status">
+    PDF export requires an available completed REAL AI report.
+  </p>
+
+  <div *ngIf="pdfExportError"
+       class="analysis-error"
+       role="alert">
+    {{ pdfExportError }}
+  </div>
+
+  <div *ngIf="pdfExportMessage"
+       class="analysis-success"
+       role="status"
+       aria-live="polite">
+    {{ pdfExportMessage }}
+  </div>
 
 </div>
 <div
@@ -422,6 +478,10 @@
       *ngIf="qisSonar">
 
       <app-what-if-simulator
+        [releaseId]="selectedReleaseId"
+        [contextGeneration]="whatIfContextGeneration"
+        [sourceReady]="whatIfSourceReady"
+
 
         [currentQis]="
           getFinalScore()

@@ -1,5 +1,5 @@
 import { AiQualityReport } from '../ai-quality-report/ai-quality-report';
-import { Component, Input, OnChanges, OnDestroy, inject, signal } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, ViewChild, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { firstValueFrom, forkJoin, Subscription, timer, exhaustMap, catchError, EMPTY } from 'rxjs';
 import { AiOrchestratorService } from '../../../../core/services/ai-orchestrator.service';
@@ -7,6 +7,50 @@ import { WorkflowRun, WorkflowStep, Preflight, STEP_NAMES, active } from '../../
 @Component({selector:'app-ai-orchestrator', standalone:true, imports:[CommonModule, AiQualityReport], templateUrl:'./ai-orchestrator.html', styleUrl:'./ai-orchestrator.css'})
 export class AiOrchestrator implements OnChanges, OnDestroy {
  @Input() releaseId: string | null = null;
+
+ @ViewChild(AiQualityReport)
+ private qualityReport?: AiQualityReport;
+
+ getExportableRunId(
+   expectedReleaseId: string | null
+ ): string | null {
+
+   const run = this.run();
+   const child = this.qualityReport;
+
+   if (
+     this.destroyed ||
+     this.busy() ||
+     !expectedReleaseId ||
+     this.releaseId !== expectedReleaseId ||
+     !run ||
+     !run.id?.trim() ||
+     run.mode !== 'REAL' ||
+     run.status !== 'COMPLETED' ||
+     run.release_id !== expectedReleaseId ||
+     !child ||
+     child.state() !== 'AVAILABLE'
+   ) {
+     return null;
+   }
+
+   const report = child.report();
+
+   if (
+     !report ||
+     child.runId !== run.id ||
+     child.releaseId !== expectedReleaseId ||
+     report.run.id !== run.id ||
+     report.run.release_id !== expectedReleaseId ||
+     report.run.mode !== 'REAL' ||
+     report.run.status !== 'COMPLETED'
+   ) {
+     return null;
+   }
+
+   return run.id;
+ }
+
  private api = inject(AiOrchestratorService);
  private polling?: Subscription;
  private epoch = 0;

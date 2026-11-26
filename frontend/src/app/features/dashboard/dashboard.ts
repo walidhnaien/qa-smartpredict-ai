@@ -1,5 +1,7 @@
+import { ViewChild } from '@angular/core';
+import { DashboardQualitySnapshot, WhatIfExportSnapshot } from '../../core/models/quality-report-export.model';
 import { AiOrchestrator } from './components/ai-orchestrator/ai-orchestrator';
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ExecutiveScore } from './components/executive-score/executive-score';
 import { QualityIntelligence } from '../../core/models/quality-intelligence';
@@ -21,11 +23,12 @@ import { WhatIfSimulator }   from './components/what-if-simulator/what-if-simula
 import { AiIntelligenceService }  from '../../core/services/ai-intelligence.service';
 import { AiIntelligenceResponse }  from '../../core/models/ai-intelligence.model';
 import { AiQualityAdvisor }  from './components/ai-quality-advisor/ai-quality-advisor';
-import html2canvas from 'html2canvas';
 import { Release } from '../../core/models/release.model';
 import { ReleaseService } from '../../core/services/release.service';
-import { finalize } from 'rxjs';
-import jsPDF from 'jspdf';
+import { finalize, Subscription, take } from 'rxjs';
+import { QualityReportSnapshotCollector } from '../../core/services/pdf/quality-report-snapshot-collector.service';
+import { DashboardScreenshotService } from '../../core/services/pdf/dashboard-screenshot.service';
+import { QualityPdfReportService } from '../../core/services/pdf/quality-pdf-report.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -34,7 +37,167 @@ import jsPDF from 'jspdf';
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
-export class Dashboard implements OnInit {
+export class Dashboard implements OnInit, OnDestroy {
+
+  @ViewChild(AiOrchestrator)
+  private aiOrchestrator?: AiOrchestrator;
+
+  screenshotExporting = false;
+  screenshotExportError = '';
+  screenshotExportMessage = '';
+
+  private screenshotExportGeneration = 0;
+
+  pdfExporting = false;
+  pdfExportError = '';
+  pdfExportMessage = '';
+
+  private pdfExportGeneration = 0;
+  private pdfExportSubscription?: Subscription;
+
+  @ViewChild(WhatIfSimulator)
+  private whatIfSimulator?: WhatIfSimulator;
+
+  get whatIfContextGeneration(): number {
+    return this.releaseLoadGeneration;
+  }
+
+  get whatIfSourceReady(): boolean {
+
+    return !this.destroyed &&
+      !this.loadingRelease &&
+      !!this.selectedReleaseId &&
+      this.loadedReleaseId === this.selectedReleaseId &&
+      !!this.score &&
+      !!this.qisSonar &&
+      this.qisSonar.sonarScore != null &&
+      Number.isFinite(this.qisSonar.sonarScore);
+  }
+
+  captureWhatIfSnapshot(): WhatIfExportSnapshot | null {
+
+    const dashboard = this.captureDashboardSnapshot();
+    const simulator = this.whatIfSimulator;
+
+    if (
+      !dashboard ||
+      !simulator ||
+      !this.whatIfSourceReady
+    ) {
+      return null;
+    }
+
+    const snapshot = simulator.captureSnapshot(
+      dashboard.releaseId,
+      this.releaseLoadGeneration
+    );
+
+    if (!snapshot) {
+      return null;
+    }
+
+    const expectedValues = {
+      coverage: dashboard.score.coverageScore,
+      defect: dashboard.score.defectScore,
+      feedback: dashboard.score.feedbackScore,
+      incident: dashboard.score.incidentScore,
+      rca: dashboard.score.rcaScore,
+      sonar: dashboard.sonar.sonarScore
+    };
+
+    const expectedWeights = {
+      coverage: this.getNormalizedWeight('coverage'),
+      defect: this.getNormalizedWeight('defect'),
+      feedback: this.getNormalizedWeight('feedback'),
+      incident: this.getNormalizedWeight('incident'),
+      rca: this.getNormalizedWeight('RCA'),
+      sonar: 20
+    };
+
+    const keys = [
+      'coverage', 'defect', 'feedback',
+      'incident', 'rca', 'sonar'
+    ] as const;
+
+    if (
+      snapshot.currentQis !== dashboard.finalQis ||
+      keys.some(key =>
+        snapshot.currentValues[key] !== expectedValues[key]
+      ) ||
+      keys.some(key =>
+        snapshot.weights[key] !== expectedWeights[key]
+      )
+    ) {
+      return null;
+    }
+
+    return snapshot;
+  }
+
+
+
+  captureDashboardSnapshot(): DashboardQualitySnapshot | null {
+
+    const releaseId = this.selectedReleaseId;
+    const capturedAt = this.releaseMetricsCapturedAt;
+
+    if (
+      this.destroyed ||
+      this.loadingRelease ||
+      !releaseId ||
+      this.loadedReleaseId !== releaseId ||
+      !capturedAt ||
+      !Number.isFinite(Date.parse(capturedAt)) ||
+      !this.score ||
+      !this.qisSonar
+    ) {
+      return null;
+    }
+
+    const finalQis = this.qisSonar.finalQis;
+
+    if (
+      !Number.isFinite(finalQis) ||
+      finalQis < 0 ||
+      finalQis > 100
+    ) {
+      return null;
+    }
+
+    return structuredClone({
+      releaseId,
+      capturedAt,
+      score: this.score,
+      sonar: this.qisSonar,
+      finalQis
+    });
+  }
+
+
+
+  private releaseLoadGeneration = 0;
+  private destroyed = false;
+
+  private loadedReleaseId: string | null = null;
+  private releaseMetricsCapturedAt: string | null = null;
+
+  private isCurrentReleaseLoad(
+    releaseId: string,
+    generation: number
+  ): boolean {
+    return !this.destroyed &&
+      this.selectedReleaseId === releaseId &&
+      this.releaseLoadGeneration === generation;
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed = true;
+    this.cancelPdfExport();
+    ++this.releaseLoadGeneration;
+    ++this.aiRecommendationRequestId;
+    clearInterval(this.aiTimer);
+  }
+
  aiIntelligence: AiIntelligenceResponse | null = null;
   qisSonar: QisSonar | null = null;
   score: QualityIntelligence | null = null;
@@ -66,7 +229,10 @@ timelineRefreshKey = 0;
 	 private sonarService: SonarService,
 	 private aiIntelligenceService: AiIntelligenceService,
 	 private releaseService: ReleaseService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private snapshotCollector: QualityReportSnapshotCollector,
+    private pdfReportService: QualityPdfReportService,
+    private screenshotService: DashboardScreenshotService
   ) {}
   
   analysisDate = new Date();
@@ -185,122 +351,120 @@ loadSonarQis(): void {
 
 loadSelectedRelease(): void {
 
-  if (!this.selectedReleaseId) {
-    return;
-  }
+  this.cancelPdfExport();
+  this.pdfExportError = '';
+  this.pdfExportMessage = '';
 
-  const releaseId =
-    this.selectedReleaseId;
+  const generation = ++this.releaseLoadGeneration;
+  const releaseId = this.selectedReleaseId;
 
-  this.loadingRelease = true;
+  this.loadedReleaseId = null;
+  this.releaseMetricsCapturedAt = null;
 
-  /*
-   * Reset des anciennes données.
-   */
   this.score = null;
   this.qisSonar = null;
   this.aiIntelligence = null;
   this.aiRecommendation = null;
   this.aiRecommendationError = '';
   this.isAiRecommendationLoading = false;
-  ++this.aiRecommendationRequestId; // Invalide toute réponse d'une release précédente.
 
-  /*
-   * QIS métier de la Release
-   */
+  ++this.aiRecommendationRequestId;
+
+  if (!releaseId || this.destroyed) {
+    this.loadingRelease = false;
+    return;
+  }
+
+  this.loadingRelease = true;
+
   this.service
     .getScoreByRelease(releaseId)
     .subscribe({
 
-      next: (data) => {
+      next: data => {
 
-        console.log(
-          'RELEASE QUALITY:',
-          data
-        );
+        if (!this.isCurrentReleaseLoad(
+          releaseId, generation
+        )) return;
 
         this.score = data;
 
-        /*
-         * Ensuite QIS final + Sonar
-         */
         this.loadSonarQisByRelease(
-          releaseId
+          releaseId, generation
         );
 
         this.cdr.detectChanges();
       },
 
-      error: (err) => {
+      error: err => {
+
+        if (!this.isCurrentReleaseLoad(
+          releaseId, generation
+        )) return;
 
         this.loadingRelease = false;
 
         console.error(
-          'Erreur Release Quality:',
-          err
+          'Erreur Release Quality:', err
         );
+
+        this.cdr.detectChanges();
       }
     });
 }
 
-
 loadSonarQisByRelease(
-  releaseId: string
+  releaseId: string,
+  generation: number
 ): void {
 
+  if (!this.isCurrentReleaseLoad(
+    releaseId, generation
+  )) return;
+
   this.sonarService
-    .getQisWithSonarByRelease(
-      releaseId,
-      1
-    )
+    .getQisWithSonarByRelease(releaseId, 1)
     .subscribe({
 
-      next: (data) => {
+      next: data => {
 
-        console.log(
-          'RELEASE SONAR QIS:',
-          data
-        );
+        if (!this.isCurrentReleaseLoad(
+          releaseId, generation
+        )) return;
 
         this.qisSonar = data;
 
+        if (this.score && data) {
+          this.loadedReleaseId = releaseId;
+          this.releaseMetricsCapturedAt =
+            new Date().toISOString();
+        }
+
         this.loadingRelease = false;
-
-        /*
-         * L'IA reçoit maintenant les données
-         * de la Release sélectionnée.
-         */
-        // AI execution is explicit via the orchestrator.
-
 
         this.cdr.detectChanges();
       },
 
-      error: (err) => {
+      error: err => {
+
+        if (!this.isCurrentReleaseLoad(
+          releaseId, generation
+        )) return;
 
         this.loadingRelease = false;
 
         console.error(
-          'Erreur Release Sonar QIS:',
-          err
+          'Erreur Release Sonar QIS:', err
         );
+
+        this.cdr.detectChanges();
       }
     });
 }
 
-
-
-
 onReleaseChange(): void {
-
-  if (!this.selectedReleaseId) {
-    return;
-  }
-
   this.loadSelectedRelease();
 }
-
-
 
 loadReleases(): void {
 
@@ -610,92 +774,252 @@ loadAiRecommendation(): void {
       }
     });
 }
-exportPdf(): void {
+get canExportPdf(): boolean {
 
-  const dashboard =
-    document.getElementById('quality-report');
+  if (
+    this.destroyed ||
+    this.pdfExporting ||
+    this.screenshotExporting ||
+    this.loadingRelease ||
+    this.analyzingRelease ||
+    !this.selectedReleaseId
+  ) {
+    return false;
+  }
 
-  if (!dashboard) {
-    console.error('Quality report not found');
+  const releaseExists = this.releases.some(
+    release => release.id === this.selectedReleaseId
+  );
+
+  return releaseExists &&
+    !!this.aiOrchestrator?.getExportableRunId(
+      this.selectedReleaseId
+    );
+}
+
+private cancelPdfExport(): void {
+
+  ++this.screenshotExportGeneration;
+  this.screenshotExportError = '';
+  this.screenshotExportMessage = '';
+
+  ++this.pdfExportGeneration;
+
+  this.pdfExportSubscription?.unsubscribe();
+  this.pdfExportSubscription = undefined;
+
+  this.pdfExporting = false;
+}
+
+private isCurrentPdfExport(
+  releaseId: string,
+  runId: string,
+  generation: number
+): boolean {
+
+  return !this.destroyed &&
+    this.pdfExportGeneration === generation &&
+    this.selectedReleaseId === releaseId &&
+    this.aiOrchestrator?.getExportableRunId(
+      releaseId
+    ) === runId;
+}
+
+get canExportDashboardPdf(): boolean {
+  return !this.destroyed &&
+    !this.pdfExporting &&
+    !this.screenshotExporting &&
+    !this.loadingRelease &&
+    !this.analyzingRelease &&
+    !this.isAiGenerating &&
+    !!this.selectedReleaseId &&
+    this.loadedReleaseId === this.selectedReleaseId &&
+    this.releases.some(r => r.id === this.selectedReleaseId) &&
+    !!this.score &&
+    !!this.qisSonar;
+}
+
+async exportDashboardPdf(): Promise<void> {
+
+  if (!this.canExportDashboardPdf) return;
+
+  const releaseId = this.selectedReleaseId;
+  const release = this.releases.find(r => r.id === releaseId);
+  const element = document.getElementById('quality-report');
+
+  if (!release || !element) {
+    this.screenshotExportError = 'Dashboard is unavailable.';
     return;
   }
 
-  html2canvas(dashboard, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: '#ffffff'
-  }).then(canvas => {
+  const generation = ++this.screenshotExportGeneration;
 
-    const imageData =
-      canvas.toDataURL('image/png');
+  this.screenshotExporting = true;
+  this.screenshotExportError = '';
+  this.screenshotExportMessage = '';
 
-    const pdf =
-      new jsPDF(
-        'p',
-        'mm',
-        'a4'
-      );
+  const isCurrent = (): boolean =>
+    !this.destroyed &&
+    generation === this.screenshotExportGeneration &&
+    this.selectedReleaseId === releaseId &&
+    !this.loadingRelease &&
+    !this.analyzingRelease &&
+    element.isConnected;
 
-    const pdfWidth =
-      pdf.internal.pageSize.getWidth();
+  try {
 
-    const pdfHeight =
-      pdf.internal.pageSize.getHeight();
+    const pdf = await this.screenshotService.generate(element);
 
-    const margin = 10;
+    if (!isCurrent()) return;
 
-    const availableWidth =
-      pdfWidth - (margin * 2);
-
-    const imageHeight =
-      (canvas.height * availableWidth)
-      / canvas.width;
-
-    let heightLeft = imageHeight;
-
-    let position = margin;
-
-    pdf.addImage(
-      imageData,
-      'PNG',
-      margin,
-      position,
-      availableWidth,
-      imageHeight
+    const version = release.version.replace(
+      /[^a-zA-Z0-9._-]/g, '_'
     );
 
-    heightLeft -=
-      pdfHeight - (margin * 2);
-
-    while (heightLeft > 0) {
-
-      position =
-        heightLeft - imageHeight + margin;
-
-      pdf.addPage();
-
-      pdf.addImage(
-        imageData,
-        'PNG',
-        margin,
-        position,
-        availableWidth,
-        imageHeight
-      );
-
-      heightLeft -=
-        pdfHeight - (margin * 2);
-    }
-
-    const date =
-      new Date()
-        .toISOString()
-        .slice(0, 10);
+    const date = new Date().toISOString().slice(0, 10);
 
     pdf.save(
-      `QA-SmartPredict-Quality-Report-${date}.pdf`
+      `QA-SmartPredict-Dashboard-${version}-${date}.pdf`
     );
-  });
+
+    this.screenshotExportMessage =
+      'Dashboard PDF generated successfully.';
+
+  } catch (error) {
+
+    if (isCurrent()) {
+      this.screenshotExportError =
+        'Dashboard PDF export failed. Please try again.';
+    }
+
+  } finally {
+
+    this.screenshotExporting = false;
+
+    if (!this.destroyed) {
+      this.cdr.markForCheck();
+    }
+  }
+}
+
+exportPdf(): void {
+
+  if (!this.canExportPdf) return;
+
+  const releaseId = this.selectedReleaseId;
+
+  const release = this.releases.find(
+    item => item.id === releaseId
+  );
+
+  const runId =
+    this.aiOrchestrator?.getExportableRunId(
+      releaseId
+    );
+
+  if (!releaseId || !release || !runId) {
+    return;
+  }
+
+  const generation = ++this.pdfExportGeneration;
+
+  this.pdfExporting = true;
+  this.pdfExportError = '';
+  this.pdfExportMessage = '';
+
+  const fail = (error: unknown): void => {
+
+    if (
+      this.destroyed ||
+      this.pdfExportGeneration !== generation
+    ) return;
+
+    console.error('PDF export failed:', error);
+
+    this.pdfExportError =
+      'PDF export failed. Please try again.';
+  };
+
+  const finish = (): void => {
+
+    if (
+      this.destroyed ||
+      this.pdfExportGeneration !== generation
+    ) return;
+
+    this.pdfExporting = false;
+    this.cdr.markForCheck();
+  };
+
+  try {
+
+    const currentDashboard =
+      this.captureDashboardSnapshot();
+
+    const simulation = currentDashboard
+      ? this.captureWhatIfSnapshot()
+      : null;
+
+    this.pdfExportSubscription =
+      this.snapshotCollector.collect({
+        release,
+        runId,
+        currentDashboard,
+        simulation
+      }).pipe(
+        take(1),
+        finalize(finish)
+      ).subscribe({
+
+        next: result => {
+
+          if (!this.isCurrentPdfExport(
+            releaseId, runId, generation
+          )) {
+            return;
+          }
+
+          try {
+
+            const pdf = this.pdfReportService.generate(
+              result.data,
+              result.context
+            );
+
+            if (!this.isCurrentPdfExport(
+              releaseId, runId, generation
+            )) {
+              return;
+            }
+
+            const date = new Date()
+              .toISOString()
+              .slice(0, 10);
+
+            const version = release.version
+              .replace(/[^a-zA-Z0-9._-]/g, '_');
+
+            pdf.save(
+              `QA-SmartPredict-Quality-Report-${version}-${date}.pdf`
+            );
+
+            this.pdfExportMessage =
+              result.warnings.length > 0
+                ? 'PDF generated with limitations. See the report warnings.'
+                : 'PDF generated successfully.';
+
+          } catch (error) {
+            fail(error);
+          }
+        },
+
+        error: fail
+      });
+
+  } catch (error) {
+    fail(error);
+    finish();
+  }
 }
 
 

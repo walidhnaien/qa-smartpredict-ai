@@ -1,36 +1,36 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Chart } from 'chart.js';
+import { QUALITY_CHART_FACTORY } from './quality-chart.factory';
+import type { ChartConfiguration } from 'chart.js';
 import { QualityBreakdown } from './quality-breakdown';
 
-const mocks = vi.hoisted(() => ({
+const mocks = {
   destroy: vi.fn()
-}));
+};
 
-vi.mock('chart.js', () => ({
-  registerables: [],
-  Chart: class {
-    static register = vi.fn();
-    static created = vi.fn();
-
-    destroy = mocks.destroy;
-
-    constructor(canvas: unknown, config: unknown) {
-      (this.constructor as any).created(canvas, config);
-    }
-  }
-}));
+const created = vi.fn(
+  (_canvas: HTMLCanvasElement,
+   _config: ChartConfiguration<'doughnut'>) => ({
+    destroy: mocks.destroy
+  })
+);
 
 describe('QualityBreakdown', () => {
   let fixture: ComponentFixture<QualityBreakdown>;
-  const created = (Chart as any).created;
+
 
   beforeEach(async () => {
     created.mockClear();
     mocks.destroy.mockClear();
 
     await TestBed.configureTestingModule({
-      imports: [QualityBreakdown]
+      imports: [QualityBreakdown],
+      providers: [
+        {
+          provide: QUALITY_CHART_FACTORY,
+          useValue: created
+        }
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(QualityBreakdown);

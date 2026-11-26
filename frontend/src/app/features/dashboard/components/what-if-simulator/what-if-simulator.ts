@@ -1,3 +1,4 @@
+import { WhatIfExportSnapshot } from '../../../../core/models/quality-report-export.model';
 import {
   Component,
   Input,
@@ -19,6 +20,98 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './what-if-simulator.css'
 })
 export class WhatIfSimulator implements OnChanges {
+
+  @Input() releaseId: string | null = null;
+  @Input() contextGeneration = -1;
+  @Input() sourceReady = false;
+
+  captureSnapshot(
+    expectedReleaseId: string,
+    expectedGeneration: number
+  ): WhatIfExportSnapshot | null {
+
+    if (
+      !this.sourceReady ||
+      !expectedReleaseId ||
+      this.releaseId !== expectedReleaseId ||
+      this.contextGeneration !== expectedGeneration ||
+      expectedGeneration < 0
+    ) {
+      return null;
+    }
+
+    const currentValues = {
+      coverage: this.coverage,
+      defect: this.defect,
+      feedback: this.feedback,
+      incident: this.incident,
+      rca: this.rca,
+      sonar: this.sonar
+    };
+
+    const simulatedValues = {
+      coverage: this.simulatedCoverage,
+      defect: this.simulatedDefect,
+      feedback: this.simulatedFeedback,
+      incident: this.simulatedIncident,
+      rca: this.simulatedRca,
+      sonar: this.simulatedSonar
+    };
+
+    const weights = {
+      coverage: this.coverageWeight,
+      defect: this.defectWeight,
+      feedback: this.feedbackWeight,
+      incident: this.incidentWeight,
+      rca: this.rcaWeight,
+      sonar: this.sonarWeight
+    };
+
+    const validScore = (value: number): boolean =>
+      Number.isFinite(value) &&
+      value >= 0 &&
+      value <= 100;
+
+    if (
+      !Object.values(currentValues).every(validScore) ||
+      !Object.values(simulatedValues).every(validScore) ||
+      !Object.values(weights).every(validScore) ||
+      !validScore(this.currentQis) ||
+      !validScore(this.simulatedQis)
+    ) {
+      return null;
+    }
+
+    const totalWeight = Object.values(weights)
+      .reduce((sum, weight) => sum + weight, 0);
+
+    if (Math.abs(totalWeight - 100) > 0.000001) {
+      return null;
+    }
+
+    return structuredClone({
+      releaseId: expectedReleaseId,
+      capturedAt: new Date().toISOString(),
+
+      currentQis: this.currentQis,
+      simulatedQis: this.simulatedQis,
+      difference: this.difference,
+
+      currentDecision: this.currentDecision,
+      simulatedDecision: this.simulatedDecision,
+
+      targetQis: this.targetQis,
+      gapToGo: this.gapToGo,
+
+      currentValues,
+      simulatedValues,
+      weights,
+
+      recommendation: this.recommendation
+    });
+  }
+
+
 
   // Scores réels
   @Input() currentQis = 0;

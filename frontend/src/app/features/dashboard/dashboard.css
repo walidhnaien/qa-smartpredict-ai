@@ -674,3 +674,27 @@ app-what-if-simulator {
     transform: translateX(290%);
   }
 }
+
+/* V4.0.5 - Dual PDF export */
+.dashboard-actions {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-actions > p,
+.dashboard-actions > [role="alert"],
+.dashboard-actions > div[role="status"] {
+  flex-basis: 100%;
+  text-align: right;
+}
+
+.screenshot-pdf-btn {
+  background: #2563eb;
+}
+
+.export-pdf-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}

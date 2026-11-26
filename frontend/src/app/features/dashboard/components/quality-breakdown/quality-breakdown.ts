@@ -1,5 +1,6 @@
 import {
   Component,
+  inject,
   Input,
   OnChanges,
   SimpleChanges,
@@ -10,9 +11,13 @@ import {
 } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
-import { Chart, ChartConfiguration, registerables } from 'chart.js';
+import type { ChartConfiguration } from 'chart.js';
+import {
+  QUALITY_CHART_FACTORY,
+  QualityChartHandle
+} from './quality-chart.factory';
 
-Chart.register(...registerables);
+
 
 @Component({
   selector: 'app-quality-breakdown',
@@ -36,7 +41,8 @@ export class QualityBreakdown
   @ViewChild('breakdownChart')
   chartCanvas!: ElementRef<HTMLCanvasElement>;
 
-  private chart?: Chart;
+  private chart?: QualityChartHandle;
+  private readonly chartFactory = inject(QUALITY_CHART_FACTORY);
 
   private viewInitialized = false;
 
@@ -122,7 +128,7 @@ export class QualityBreakdown
       }
     };
 
-    this.chart = new Chart(
+    this.chart = this.chartFactory(
       this.chartCanvas.nativeElement,
       config
     );
