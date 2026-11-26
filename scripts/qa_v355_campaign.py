@@ -25,7 +25,7 @@ try:
         if not pre['readyToRun']: raise RuntimeError('Preflight blocked: '+str(pre))
         started=dt.datetime.now(dt.timezone.utc).isoformat(); clock=time.monotonic()
         print(n,'POST REAL',flush=True)
-        run=api('/run',{'releaseId':a.release,'mode':'REAL'}); save(n+'-accepted.json',run); rid=uid(run['id']); print(n,rid,flush=True)
+        run=api('/run',{'releaseId':a.release,'mode':'REAL'}); save(n+'-accepted.json',run); rid=uid(run['runId']); print(n,rid,flush=True)
         previous=None
         while True:
             run=api('/run/'+rid); save(n+'-run.json',run)
