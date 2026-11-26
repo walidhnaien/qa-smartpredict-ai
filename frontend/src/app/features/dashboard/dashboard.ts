@@ -1,3 +1,4 @@
+import { AiOrchestrator } from './components/ai-orchestrator/ai-orchestrator';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ExecutiveScore } from './components/executive-score/executive-score';
@@ -29,7 +30,7 @@ import jsPDF from 'jspdf';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule,ExecutiveScore,AiQualityAdvisor,ReleaseDecision,QualityBreakdown,SonarHealth,QualityKpiCard,Timeline,RuleDesigner,WhatIfSimulator],
+  imports: [AiOrchestrator, CommonModule, FormsModule,ExecutiveScore,AiQualityAdvisor,ReleaseDecision,QualityBreakdown,SonarHealth,QualityKpiCard,Timeline,RuleDesigner,WhatIfSimulator],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -165,7 +166,7 @@ loadSonarQis(): void {
 
         this.qisSonar = data;
 
-        this.loadAiIntelligence();
+        // AI execution is explicit via the orchestrator.
 
         this.cdr.detectChanges();
       },
@@ -269,8 +270,8 @@ loadSonarQisByRelease(
          * L'IA reçoit maintenant les données
          * de la Release sélectionnée.
          */
-        this.loadAiIntelligence();
-        this.loadAiRecommendation();
+        // AI execution is explicit via the orchestrator.
+
 
         this.cdr.detectChanges();
       },
@@ -724,7 +725,7 @@ analyzeRelease(): void {
         );
 
         this.analysisMessage =
-          'Analysis completed — Final QIS: ${result.finalQis}';
+          `Analysis completed — Final QIS: ${result.finalQis}`;
 
         /*
          * Force le rafraîchissement de la Timeline

@@ -1,0 +1,16 @@
+<section class="workflow" aria-label="AI Quality Orchestrator">
+ <header><div><small>LOCAL AI · V4</small><h2>AI Quality Orchestrator</h2></div><strong>{{run()?.status || 'READY'}}</strong></header>
+ <p>Java remains the authority for release recommendations. Human review is required.</p>
+ @if (preflight(); as pf) { <p>Resource preflight: <strong>{{pf.status}}</strong></p>
+ @for (warning of pf.warnings; track warning) { <div class="warning">{{warning}}</div> }
+ @for (blocker of pf.blockers; track blocker) { <div class="error">{{blocker}}</div> } }
+ @if(otherActive()) { <p class="warning">Another workflow is active. Reconnect after it finishes.</p> }
+ <div class="actions"><button type="button" (click)="start()" [disabled]="!releaseId || busy() || !ready() || !preflight()?.readyToRun || isActive(run()) || otherActive()">Run AI Quality Analysis</button><button type="button" (click)="reconnect()" [disabled]="busy()">Reconnect / Refresh</button></div>
+ @if(error()) { <p role="alert" class="error">{{error()}}</p> }
+ @if(run(); as r) { <p class="meta">Run: {{r.id}} · Recoveries: {{r.recovery_count}}</p>
+ <label for="workflow-progress">Completed steps: {{completed}} / 8</label><progress id="workflow-progress" [value]="completed" max="8"></progress>
+ <ol>@for(name of names; track name) { <li><span>{{name.replaceAll('_',' ')}} <small>{{step(name)?.model || 'Java'}}</small></span><strong [class.success]="step(name)?.status === 'SUCCESS'" [class.error]="step(name)?.status === 'FAILED'">{{step(name)?.status || 'PENDING'}}</strong><small>Attempt {{step(name)?.attempt || 0}} @if(step(name)?.duration_ms != null) { · {{(step(name)?.duration_ms || 0)/1000 | number:'1.1-1'}} s }</small>@if(step(name)?.error_message; as msg) { <div class="error">{{msg}}</div> }</li> }</ol>
+ @if(r.status === 'FAILED') { <p role="alert" class="error">{{r.error_message || 'Workflow failed'}}</p> }
+ @if(r.status === 'COMPLETED') { <p class="success">Workflow completed. Human review remains required. Detailed report is planned for V4.0.4–V4.0.5.</p> }
+ }
+</section>
