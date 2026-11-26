@@ -1,0 +1,722 @@
+[
+  {
+    "caseId": "aa7b6f594d29",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "The low DefectScore of 22.22 indicates strong defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "5ce6d8f14cfe",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "BugRatio of 77.78 means 77.78 percent of stories are defective."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "11927cfeeb73",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "Sonar code coverage is identical to functional coverage."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "69875916d7b4",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "The uncovered requirement is not business critical."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "ae6d8dc4b7b8",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "Epic coverage and requirement coverage are the same metric."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "191dafad0557",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "The official release recommendation is GO.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "75e1bb321cb6",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "Three Jira bugs are critical."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "6b64da325feb",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "The uncovered requirement may affect a critical journey; this is unverified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "9ee7d0f5bc7e",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "The 35 code smells caused the production incidents."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "413893757ed1",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "The defect quality ratio of 22.22 is the percentage of bugs."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "ec48f81b2799",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "All five requirements are covered."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "b4a4b16bc62f",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "High risk is a positive justification for release.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "2c7a4c9adc11",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "The official main risk is TRACEABILITY.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "bdb0d06e71bb",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "The recorded bugs caused financial losses for customers."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "d19ab37a552b",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is moderate.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "75d9d057ace6",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 guarantees the release is safe.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "99600a36a567",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "Lower DefectScore indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "243a45385792",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "The release has already been approved by the QA manager.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "1d06f67f10f3",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is LOW.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "ce69cbdb1a05",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK remains conditional on human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "89ad30b49bba",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "High confidence supports the deterministic release decision and authorizes delivery.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "60cfcd7a8fd9",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 95; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "8787c32691e1",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK proves that no residual risks exist.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "7169311951ec",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89 and release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "729384639604",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Human approval is unnecessary before release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "c200ee824092",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "The recorded Sonar vulnerability has been fixed since the scan."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "d1ec617937aa",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "This action guarantees a future QIS of 95."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "1d3c28c5babf",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "Sonar reported seven bugs, identical to the Jira bug count."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "c2259ec65253",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "Requirement coverage of 80 percent proves all stories are Done."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Identify the uncovered requirement and assess its criticality.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  },
+  {
+    "caseId": "f3ae93662a48",
+    "officialMetricsId": "A01",
+    "candidate": {
+      "executiveSummary": "QIS is 68.89; official release risk is HIGH.",
+      "releaseRationale": "GO_WITH_RISK is a recommendation subject to human risk acceptance.",
+      "managerMessage": "Review residual risks before approving release.",
+      "confidenceExplanation": "Confidence of 95 does not establish release safety.",
+      "topRisks": [
+        {
+          "dimension": "DEFECT_QUALITY",
+          "severity": "HIGH",
+          "reason": "DefectScore of 22.22 indicates weaker defect quality."
+        }
+      ],
+      "priorityActions": [
+        {
+          "priority": 1,
+          "action": "Triage the seven reported bugs by severity and customer impact.",
+          "expectedImpact": "Potential improvement; not quantified."
+        }
+      ]
+    }
+  }
+]

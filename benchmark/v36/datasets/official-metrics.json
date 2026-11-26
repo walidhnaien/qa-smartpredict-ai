@@ -1,0 +1,25 @@
+{
+  "A01": {
+    "qis": 68.89,
+    "bugs": 4,
+    "bugRatio": 77.77777777777777,
+    "totalBugs": 7,
+    "codeSmells": 35,
+    "sonarScore": 75.25,
+    "defectScore": 22.22222222222223,
+    "duplication": 4.3,
+    "totalStories": 9,
+    "coverageScore": 80,
+    "feedbackScore": 100,
+    "incidentScore": 57.14,
+    "sonarCoverage": 72.5,
+    "vulnerabilities": 1,
+    "totalRequirements": 5,
+    "coveredRequirements": 4,
+    "uncoveredRequirements": 1,
+    "confidence": 95,
+    "riskLevel": "HIGH",
+    "mainRisk": "DEFECT_QUALITY",
+    "releaseDecision": "GO_WITH_RISK"
+  }
+}
