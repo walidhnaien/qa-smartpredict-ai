@@ -11,6 +11,15 @@
  <label for="workflow-progress">Completed steps: {{completed}} / 8</label><progress id="workflow-progress" [value]="completed" max="8"></progress>
  <ol>@for(name of names; track name) { <li><span>{{name.replaceAll('_',' ')}} <small>{{step(name)?.model || 'Java'}}</small></span><strong [class.success]="step(name)?.status === 'SUCCESS'" [class.error]="step(name)?.status === 'FAILED'">{{step(name)?.status || 'PENDING'}}</strong><small>Attempt {{step(name)?.attempt || 0}} @if(step(name)?.duration_ms != null) { · {{(step(name)?.duration_ms || 0)/1000 | number:'1.1-1'}} s }</small>@if(step(name)?.error_message; as msg) { <div class="error">{{msg}}</div> }</li> }</ol>
  @if(r.status === 'FAILED') { <p role="alert" class="error">{{r.error_message || 'Workflow failed'}}</p> }
- @if(r.status === 'COMPLETED') { <p class="success">Workflow completed. Human review remains required. Detailed report is planned for V4.0.4–V4.0.5.</p> }
+ @if(r.status === 'COMPLETED' && r.mode === 'REAL' && r.release_id === releaseId) {
+   <p class="success">
+     Workflow completed. Human review remains required.
+   </p>
+
+   <app-ai-quality-report
+     [runId]="r.id"
+     [releaseId]="releaseId">
+   </app-ai-quality-report>
+ }
  }
 </section>

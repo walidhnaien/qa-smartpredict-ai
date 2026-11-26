@@ -1,3 +1,4 @@
+import { timeout } from 'rxjs';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { WorkflowRun, WorkflowStep, StartResponse, Preflight } from '../models/ai-orchestrator.model';
@@ -10,5 +11,9 @@ export class AiOrchestratorService {
  start(releaseId: string) { return this.http.post<StartResponse>(`${this.base}/run`, {releaseId, mode:'REAL'}); }
  run(id: string) { return this.http.get<WorkflowRun>(`${this.base}/run/${id}`); }
  steps(id: string) { return this.http.get<WorkflowStep[]>(`${this.base}/run/${id}/steps`); }
- result(id: string) { return this.http.get<unknown>(`${this.base}/run/${id}/result`); }
+ result(id: string) {
+   return this.http.get<unknown>(
+     `${this.base}/run/${id}/result`
+   ).pipe(timeout(30000));
+ }
 }

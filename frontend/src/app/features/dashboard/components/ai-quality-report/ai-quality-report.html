@@ -1,0 +1,303 @@
+<section class="quality-report" aria-label="AI Quality Report">
+
+  <header class="report-header">
+    <div>
+      <small>QA SMARTPREDICT · V4.0.4</small>
+      <h2>AI Quality Report</h2>
+      <p>Evidence-based release decision support</p>
+    </div>
+    <span class="status">{{state()}}</span>
+  </header>
+
+  @if (state() === 'LOADING') {
+    <p role="status">Loading completed workflow report...</p>
+  }
+
+  @if (state() === 'ERROR' || state() === 'UNAVAILABLE') {
+    <div class="notice warning" role="alert">
+      <p>{{error() || 'Report unavailable or incomplete.'}}</p>
+      <button type="button" (click)="load()">
+        Retry report retrieval
+      </button>
+    </div>
+  }
+
+  @if (report(); as r) {
+
+    <div class="notice warning">
+      Java remains the authority for release recommendations.
+      This report does not constitute release approval.
+      Human QA review remains required.
+    </div>
+
+    <section class="report-section">
+      <h3>1. Execution Summary</h3>
+
+      <div class="metadata">
+        <div><strong>Run ID</strong><span>{{r.run.id}}</span></div>
+        <div><strong>Release ID</strong><span>{{r.run.release_id}}</span></div>
+        <div><strong>Workflow version</strong><span>{{r.run.workflow_version ?? 'N/A'}}</span></div>
+        <div><strong>Mode</strong><span>{{r.run.mode}}</span></div>
+        <div><strong>Status</strong><span>{{r.run.status}}</span></div>
+        <div><strong>Completed at</strong><span>{{r.run.completed_at ? (r.run.completed_at | date:'medium') : 'N/A'}}</span></div>
+        <div>
+          <strong>Duration</strong>
+          <span>
+            @if (r.run.duration_ms != null) {
+              {{r.run.duration_ms / 1000 | number:'1.1-3'}} s
+            } @else { N/A }
+          </span>
+        </div>
+        <div><strong>Recoveries</strong><span>{{r.run.recovery_count ?? 'N/A'}}</span></div>
+      </div>
+    </section>
+
+    @if (r.revisedAnalysis; as a) {
+
+      <section class="report-section">
+        <h3>2. Official Quality Metrics</h3>
+
+        <div class="metrics-grid">
+
+          <div class="metric">
+            <small>Quality Index Score</small>
+            <strong>{{a.qis == null ? 'N/A' : (a.qis | number:'1.2-2')}}</strong>
+          </div>
+
+          <div class="metric">
+            <small>Defect Quality Score</small>
+            <strong>{{a.defectScore == null ? 'N/A' : (a.defectScore | number:'1.2-2')}}</strong>
+          </div>
+
+          <div class="metric">
+            <small>Bugs per 100 user stories</small>
+            <strong>{{a.bugRatio == null ? 'N/A' : (a.bugRatio | number:'1.2-2')}}</strong>
+          </div>
+
+          <div class="metric">
+            <small>Analysis confidence</small>
+            <strong>{{a.confidence ?? 'N/A'}}</strong>
+            <small>Not a probability of release safety</small>
+          </div>
+
+          <div class="metric">
+            <small>Official risk level</small>
+            <strong [class.danger]="a.riskLevel === 'HIGH'">
+              {{a.riskLevel ?? 'N/A'}}
+            </strong>
+          </div>
+
+          <div class="metric">
+            <small>Main risk dimension</small>
+            <strong class="risk-dimension">{{a.mainRisk ?? 'N/A'}}</strong>
+          </div>
+
+        </div>
+
+        <div class="decision">
+          <small>Official Java release recommendation</small>
+          <h3>{{a.releaseDecision ?? 'N/A'}}</h3>
+          <p>Release recommendation is not release authorization.</p>
+        </div>
+
+      </section>
+
+      <section class="report-section">
+        <h3>3. Executive Analysis</h3>
+
+        <h4>Executive Summary</h4>
+        <p>{{a.executiveSummary ?? 'N/A'}}</p>
+
+        <h4>Release Rationale</h4>
+        <p>{{a.releaseRationale ?? 'N/A'}}</p>
+
+        <h4>Confidence Explanation</h4>
+        <p>{{a.confidenceExplanation ?? 'N/A'}}</p>
+
+        <h4>Manager Message</h4>
+        <p>{{a.managerMessage ?? 'N/A'}}</p>
+      </section>
+
+      <section class="report-section">
+        <h3>4. Top Risks</h3>
+
+        @for (risk of a.topRisks ?? []; track $index) {
+          <article class="item">
+            <h4>{{risk.dimension ?? 'N/A'}}</h4>
+            <span class="status">{{risk.severity ?? 'N/A'}}</span>
+            <p>{{risk.reason ?? 'N/A'}}</p>
+          </article>
+        } @empty {
+          <p>No risk details provided by the API.</p>
+        }
+      </section>
+
+      <section class="report-section">
+        <h3>5. Priority Actions</h3>
+
+        @for (action of a.priorityActions ?? []; track $index) {
+          <article class="item">
+
+            <div class="action-header">
+              <span class="priority">{{action.priority == null ? 'N/A' : 'P' + action.priority}}</span>
+              <h4>{{action.action ?? 'N/A'}}</h4>
+            </div>
+
+            <p><strong>Origin:</strong> {{action.origin ?? 'N/A'}}</p>
+            <p><strong>Evidence:</strong> {{action.evidence ?? 'N/A'}}</p>
+            <p><strong>Expected impact:</strong> {{action.expectedImpact ?? 'N/A'}}</p>
+            <p><strong>Acceptance criterion:</strong> {{action.acceptanceCriterion ?? 'N/A'}}</p>
+
+          </article>
+        } @empty {
+          <p>No priority actions provided by the API.</p>
+        }
+      </section>
+
+    }
+
+    @if (r.validationReport; as v) {
+
+      <section class="report-section">
+        <h3>6. Governance &amp; Validation</h3>
+
+        <div class="metadata">
+          <div><strong>Guardrail status</strong><span>{{v.status ?? 'N/A'}}</span></div>
+          <div><strong>Detected issues</strong><span>{{v.detectedIssues ?? 'N/A'}}</span></div>
+          <div><strong>Resolved issues</strong><span>{{v.resolvedIssues ?? 'N/A'}}</span></div>
+          <div><strong>Issue resolution rate</strong><span>{{v.issueResolutionRate ?? 'N/A'}}</span></div>
+
+          <div>
+            <strong>Human review required</strong>
+            <span>
+              {{r.humanReviewRequired === true ? 'YES' : r.humanReviewRequired === false ? 'NO' : 'N/A'}}
+            </span>
+          </div>
+
+          <div>
+            <strong>Semantic quality certified</strong>
+            <span>
+              {{r.semanticQualityCertified === true ? 'YES' : r.semanticQualityCertified === false ? 'NO' : 'N/A'}}
+            </span>
+          </div>
+        </div>
+
+        <div class="notice warning">
+          {{v.note ?? 'Semantic validation details unavailable.'}}
+        </div>
+
+      </section>
+
+      <section class="report-section">
+        <h3>7. Semantic Traceability</h3>
+
+        @if (v.semanticTraceability; as s) {
+
+          <p><strong>Status:</strong> {{s.status ?? 'N/A'}}</p>
+
+          <div class="metrics-grid">
+
+            <div class="metric">
+              <small>Evaluated claims</small>
+              <strong>{{s.evaluatedClaims ?? 'N/A'}}</strong>
+            </div>
+
+            <div class="metric">
+              <small>Semantic alerts</small>
+              <strong>{{s.alertCount ?? 'N/A'}}</strong>
+            </div>
+
+            <div class="metric">
+              <small>Evidence gaps</small>
+              <strong>{{s.evidenceGaps ?? 'N/A'}}</strong>
+            </div>
+
+            <div class="metric">
+              <small>Potential contradictions</small>
+              <strong>{{s.potentialContradictions ?? 'N/A'}}</strong>
+            </div>
+
+            <div class="metric">
+              <small>Unique alerted fields</small>
+              <strong>{{s.uniqueAlertedFields ?? 'N/A'}}</strong>
+            </div>
+
+            <div class="metric">
+              <small>Changed alerted fields</small>
+              <strong>{{s.changedAlertedFields ?? 'N/A'}}</strong>
+            </div>
+
+          </div>
+
+          <div class="metadata">
+            <div><strong>Confirmed semantic issues</strong><span>{{s.confirmedSemanticIssues ?? 'N/A'}}</span></div>
+            <div><strong>Confirmed resolved issues</strong><span>{{s.confirmedResolvedSemanticIssues ?? 'N/A'}}</span></div>
+            <div><strong>Semantic resolution rate</strong><span>{{s.semanticIssueResolutionRate ?? 'N/A'}}</span></div>
+          </div>
+
+          <div class="notice warning">
+            A changed field does not prove that its semantic issue
+            has been resolved. Human review remains necessary.
+          </div>
+
+          <h4>Semantic Alert Details</h4>
+
+          @for (alert of s.alerts ?? []; track $index) {
+
+            <details class="semantic-alert">
+
+              <summary>
+                Alert {{$index + 1}} ·
+                {{alert.model ?? 'N/A'}} ·
+                {{alert.assessment?.findingNature ?? 'N/A'}}
+              </summary>
+
+              <div class="metadata">
+                <div><strong>Status</strong><span>{{alert.status ?? 'N/A'}}</span></div>
+                <div><strong>Source field</strong><span>{{alert.assessment?.sourcePath ?? 'N/A'}}</span></div>
+                <div><strong>Reference ID</strong><span>{{alert.assessment?.referenceId ?? 'N/A'}}</span></div>
+                <div><strong>Statement ID</strong><span>{{alert.assessment?.statementId ?? 'N/A'}}</span></div>
+                <div><strong>Relation</strong><span>{{alert.assessment?.relation ?? 'N/A'}}</span></div>
+                <div><strong>Field changed</strong><span>{{alert.sourceFieldChanged === true ? 'YES' : alert.sourceFieldChanged === false ? 'NO' : 'N/A'}}</span></div>
+              </div>
+
+              <div class="comparison">
+
+                <div class="before">
+                  <h4>Before — Flagged statement</h4>
+                  <p>{{alert.before ?? 'N/A'}}</p>
+                </div>
+
+                <div class="after">
+                  <h4>After — Revised statement</h4>
+                  <p>{{alert.after ?? 'N/A'}}</p>
+                </div>
+
+              </div>
+
+              <h4>Evidence</h4>
+              <p>{{alert.assessment?.evidence ?? 'N/A'}}</p>
+
+              <h4>Premise</h4>
+              <p>{{alert.assessment?.premise ?? 'N/A'}}</p>
+
+              <h4>Hypothesis</h4>
+              <p>{{alert.assessment?.hypothesis ?? 'N/A'}}</p>
+
+            </details>
+
+          } @empty {
+            <p>No semantic alert details provided.</p>
+          }
+
+        } @else {
+          <p>Semantic traceability unavailable for this workflow.</p>
+        }
+
+      </section>
+
+    }
+
+  }
+
+</section>

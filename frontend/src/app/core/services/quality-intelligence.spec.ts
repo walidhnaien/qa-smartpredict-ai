@@ -1,13 +1,21 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { QualityIntelligence } from './quality-intelligence';
+import { QualityIntelligenceService } from './quality-intelligence';
 
-describe('QualityIntelligence', () => {
-  let service: QualityIntelligence;
+describe('QualityIntelligenceService', () => {
+  let service: QualityIntelligenceService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(QualityIntelligence);
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
+    });
+
+    service = TestBed.inject(QualityIntelligenceService);
   });
 
   it('should be created', () => {

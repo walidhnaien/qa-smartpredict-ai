@@ -1,9 +1,10 @@
+import { AiQualityReport } from '../ai-quality-report/ai-quality-report';
 import { Component, Input, OnChanges, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { firstValueFrom, forkJoin, Subscription, timer, exhaustMap, catchError, EMPTY } from 'rxjs';
 import { AiOrchestratorService } from '../../../../core/services/ai-orchestrator.service';
 import { WorkflowRun, WorkflowStep, Preflight, STEP_NAMES, active } from '../../../../core/models/ai-orchestrator.model';
-@Component({selector:'app-ai-orchestrator', standalone:true, imports:[CommonModule], templateUrl:'./ai-orchestrator.html', styleUrl:'./ai-orchestrator.css'})
+@Component({selector:'app-ai-orchestrator', standalone:true, imports:[CommonModule, AiQualityReport], templateUrl:'./ai-orchestrator.html', styleUrl:'./ai-orchestrator.css'})
 export class AiOrchestrator implements OnChanges, OnDestroy {
  @Input() releaseId: string | null = null;
  private api = inject(AiOrchestratorService);

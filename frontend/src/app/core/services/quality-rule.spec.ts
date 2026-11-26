@@ -1,13 +1,21 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { QualityRule } from './quality-rule';
+import { QualityRuleService } from './quality-rule';
 
-describe('QualityRule', () => {
-  let service: QualityRule;
+describe('QualityRuleService', () => {
+  let service: QualityRuleService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(QualityRule);
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
+    });
+
+    service = TestBed.inject(QualityRuleService);
   });
 
   it('should be created', () => {

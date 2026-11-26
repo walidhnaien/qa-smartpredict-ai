@@ -1,0 +1,212 @@
+{
+  "humanReviewRequired": true,
+  "semanticQualityCertified": false,
+  "run": {
+    "id": "00000000-0000-4000-8000-000000000001",
+    "release_id": "00000000-0000-4000-8000-000000000002",
+    "workflow_version": "V3.5.4",
+    "mode": "REAL",
+    "status": "COMPLETED",
+    "current_step": null,
+    "created_at": "2026-01-01T10:00:00Z",
+    "started_at": "2026-01-01T10:00:00Z",
+    "completed_at": "2026-01-01T10:09:02.787Z",
+    "duration_ms": 542787,
+    "error_message": null,
+    "validation_id": "00000000-0000-4000-8000-000000000003",
+    "batch_id": "00000000-0000-4000-8000-000000000004",
+    "revision_id": "00000000-0000-4000-8000-000000000005",
+    "recovery_count": 0
+  },
+  "validationReport": {
+    "status": "PASS_GUARDRAILS",
+    "note": "Passing deterministic checks does not establish factual completeness or semantic correctness.",
+    "issues": [],
+    "detectedIssues": 0,
+    "resolvedIssues": 0,
+    "issueResolution": [],
+    "issueResolutionRate": null,
+    "humanReviewRequired": true,
+    "semanticQualityCertified": false,
+    "riskWordingImproved": false,
+    "v1ModerateRiskWording": false,
+    "v2ModerateRiskWording": false,
+    "semanticTraceability": {
+      "status": "HUMAN_REVIEW_REQUIRED",
+      "alerts": [
+        {
+          "before": "Confidence guarantees release safety.",
+          "after": "Confidence does not guarantee release safety.",
+          "model": "qwen2.5:3b",
+          "status": "HUMAN_REVIEW_REQUIRED",
+          "sourceFieldChanged": true,
+          "assessment": {
+            "premise": "Synthetic QA reference evidence.",
+            "evidence": "Confidence guarantees release safety.",
+            "relation": "NOT_ESTABLISHED",
+            "claimType": "TEXT",
+            "hypothesis": "Confidence guarantees release safety.",
+            "sourcePath": "/confidenceExplanation",
+            "referenceId": "TEST_REF_1",
+            "statementId": "C1",
+            "derivedClaim": false,
+            "findingNature": "EVIDENCE_GAP",
+            "semanticStatus": "HUMAN_REVIEW_REQUIRED",
+            "parentStatementId": "C1"
+          }
+        },
+        {
+          "before": "The release has low risk.",
+          "after": "The official release risk is HIGH.",
+          "model": "gemma3-qa:4b",
+          "status": "HUMAN_REVIEW_REQUIRED",
+          "sourceFieldChanged": true,
+          "assessment": {
+            "premise": "Synthetic QA reference evidence.",
+            "evidence": "The release has low risk.",
+            "relation": "CONTRADICTED",
+            "claimType": "TEXT",
+            "hypothesis": "The release has low risk.",
+            "sourcePath": "/executiveSummary",
+            "referenceId": "TEST_REF_2",
+            "statementId": "C2",
+            "derivedClaim": false,
+            "findingNature": "POTENTIAL_CONTRADICTION",
+            "semanticStatus": "HUMAN_REVIEW_REQUIRED",
+            "parentStatementId": "C2"
+          }
+        },
+        {
+          "before": "The release requires no additional review.",
+          "after": "Residual risks require QA review.",
+          "model": "gemma3-qa:4b",
+          "status": "HUMAN_REVIEW_REQUIRED",
+          "sourceFieldChanged": true,
+          "assessment": {
+            "premise": "Synthetic QA reference evidence.",
+            "evidence": "The release requires no additional review.",
+            "relation": "NOT_ESTABLISHED",
+            "claimType": "TEXT",
+            "hypothesis": "The release requires no additional review.",
+            "sourcePath": "/releaseRationale",
+            "referenceId": "TEST_REF_3",
+            "statementId": "C3",
+            "derivedClaim": false,
+            "findingNature": "EVIDENCE_GAP",
+            "semanticStatus": "HUMAN_REVIEW_REQUIRED",
+            "parentStatementId": "C3"
+          }
+        },
+        {
+          "before": "The release is approved.",
+          "after": "Human approval remains required.",
+          "model": "gemma3-qa:4b",
+          "status": "HUMAN_REVIEW_REQUIRED",
+          "sourceFieldChanged": true,
+          "assessment": {
+            "premise": "Synthetic QA reference evidence.",
+            "evidence": "The release is approved.",
+            "relation": "NOT_ESTABLISHED",
+            "claimType": "TEXT",
+            "hypothesis": "The release is approved.",
+            "sourcePath": "/managerMessage",
+            "referenceId": "TEST_REF_4",
+            "statementId": "C4",
+            "derivedClaim": false,
+            "findingNature": "EVIDENCE_GAP",
+            "semanticStatus": "HUMAN_REVIEW_REQUIRED",
+            "parentStatementId": "C4"
+          }
+        },
+        {
+          "before": "Confidence guarantees release safety.",
+          "after": "Confidence does not guarantee release safety.",
+          "model": "gemma3-qa:4b",
+          "status": "HUMAN_REVIEW_REQUIRED",
+          "sourceFieldChanged": true,
+          "assessment": {
+            "premise": "Synthetic QA reference evidence.",
+            "evidence": "Confidence guarantees release safety.",
+            "relation": "NOT_ESTABLISHED",
+            "claimType": "TEXT",
+            "hypothesis": "Confidence guarantees release safety.",
+            "sourcePath": "/confidenceExplanation",
+            "referenceId": "TEST_REF_5",
+            "statementId": "C5",
+            "derivedClaim": false,
+            "findingNature": "EVIDENCE_GAP",
+            "semanticStatus": "HUMAN_REVIEW_REQUIRED",
+            "parentStatementId": "C5"
+          }
+        }
+      ],
+      "alertCount": 5,
+      "evidenceGaps": 4,
+      "evaluatedClaims": 6,
+      "uniqueAlertedFields": 4,
+      "changedAlertedFields": 4,
+      "potentialContradictions": 1,
+      "confirmedSemanticIssues": null,
+      "confirmedResolvedSemanticIssues": null,
+      "semanticIssueResolutionRate": null
+    }
+  },
+  "revisedAnalysis": {
+    "qis": 68.89,
+    "defectScore": 22.22222222222223,
+    "bugRatio": 77.77777777777777,
+    "confidence": 95,
+    "riskLevel": "HIGH",
+    "mainRisk": "DEFECT_QUALITY",
+    "releaseDecision": "GO_WITH_RISK",
+    "executiveSummary": "The official release risk is HIGH.",
+    "releaseRationale": "Residual risks require QA review.",
+    "confidenceExplanation": "Confidence does not guarantee release safety.",
+    "managerMessage": "Human approval remains required.",
+    "topRisks": [
+      {
+        "dimension": "DEFECT_QUALITY",
+        "severity": "HIGH",
+        "reason": "The synthetic defect quality score is low."
+      }
+    ],
+    "priorityActions": [
+      {
+        "priority": 1,
+        "action": "Review uncovered requirements.",
+        "origin": "DETERMINISTIC_QA_PLAYBOOK",
+        "evidence": "totalRequirements=5, uncoveredRequirements=1",
+        "expectedImpact": "Not quantified; requires QA review",
+        "acceptanceCriterion": "All critical requirements have test coverage."
+      },
+      {
+        "priority": 1,
+        "action": "Review and prioritize open defects.",
+        "origin": "DETERMINISTIC_QA_PLAYBOOK",
+        "evidence": "totalBugs=7",
+        "expectedImpact": "Not quantified; requires QA review",
+        "acceptanceCriterion": "Critical defects have documented dispositions."
+      },
+      {
+        "priority": 1,
+        "action": "Document residual release risks.",
+        "origin": "DETERMINISTIC_QA_PLAYBOOK",
+        "evidence": "releaseDecision=GO_WITH_RISK",
+        "expectedImpact": "Not quantified; requires QA review",
+        "acceptanceCriterion": "Risk acceptance is documented."
+      },
+      {
+        "priority": 2,
+        "action": "Review code quality hotspots.",
+        "origin": "DETERMINISTIC_QA_PLAYBOOK",
+        "evidence": "codeSmells=35",
+        "expectedImpact": "Not quantified; requires QA review",
+        "acceptanceCriterion": "Relevant hotspots have been reviewed."
+      }
+    ],
+    "aiAdvisory": {
+      "status": "HUMAN_REVIEW_REQUIRED",
+      "questions": []
+    }
+  }
+}
