@@ -36,7 +36,7 @@ class V36BenchmarkTest {
         return ordered;
     }
     ObjectNode manifest(Path root) throws Exception {
-        ObjectNode result=m.createObjectNode().put("version","V3.6.2.1").put("timeoutMs",240000).put("keepAlive","5m");
+        ObjectNode result=m.createObjectNode().put("version","V3.6.2.2").put("timeoutMs",240000).put("keepAlive","5m");
         ObjectNode inputs=result.putObject("inputs");
         JsonNode expected=m.readTree(root.resolve("datasets/immutable-inputs.sha256.json").toFile());
         for(String name:List.of("candidate-analyses.json","official-metrics.json","qa-metrics-catalog.json")) {
@@ -95,11 +95,21 @@ class V36BenchmarkTest {
         var lifecycle=new OllamaLifecycleService("http://localhost:11434","5m");
         var javaService=new AiEvidenceIntelligenceService(new AiAgentRecommendationService());
         int limit=Integer.getInteger("benchmark.limit",3);
+        if(limit<1) throw new IllegalArgumentException("benchmark.limit must be positive");
+        String ids=System.getProperty("benchmark.caseIds", "").trim();
+        Set<String> requested=new LinkedHashSet<>();
+        if(!ids.isEmpty()) for(String id:ids.split(",",-1)) {
+            if(id.isBlank() || !requested.add(id.trim())) throw new IllegalArgumentException("Invalid or duplicate case ID");
+        }
+        List<JsonNode> selectedCases=new ArrayList<>();
+        for(JsonNode c:cases) if(requested.isEmpty() || requested.contains(c.path("caseId").asText())) selectedCases.add(c);
+        if(!requested.isEmpty() && selectedCases.size()!=requested.size()) throw new IllegalArgumentException("Unknown case ID");
+        if(requested.isEmpty()) selectedCases=selectedCases.subList(0,Math.min(limit,selectedCases.size()));
         int errors=0;
         for(String role:System.getProperty("benchmark.roles","JAVA,LLAMA,GEMMA,QWEN").split(",")) {
             if(!List.of("JAVA","LLAMA","GEMMA","QWEN").contains(role)) throw new IllegalArgumentException(role);
-            for(int i=0;i<Math.min(limit,cases.size());i++) {
-                JsonNode c=cases.get(i), candidate=c.path("candidate"), official=metrics.path(c.path("officialMetricsId").asText());
+            for(JsonNode selectedCase:selectedCases) {
+                JsonNode c=selectedCase, candidate=c.path("candidate"), official=metrics.path(c.path("officialMetricsId").asText());
                 String id=c.path("caseId").asText();
                 Path file=out.resolve(role+"-"+id+".json");
                 if(Files.exists(file)) {
