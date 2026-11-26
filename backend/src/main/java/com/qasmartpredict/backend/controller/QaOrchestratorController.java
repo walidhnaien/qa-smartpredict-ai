@@ -1,6 +1,7 @@
 package com.qasmartpredict.backend.controller;
 import java.util.*;
 import com.qasmartpredict.backend.service.orchestrator.QaOrchestratorService;
+import com.qasmartpredict.backend.service.orchestrator.ResourcePreflightService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 @RestController
@@ -8,7 +9,10 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins="http://localhost:4200")
 public class QaOrchestratorController {
     private final QaOrchestratorService service;
-    public QaOrchestratorController(QaOrchestratorService service) { this.service=service; }
+    private final ResourcePreflightService preflight;
+    public QaOrchestratorController(QaOrchestratorService service, ResourcePreflightService preflight) { this.service=service; this.preflight=preflight; }
+    @GetMapping("/preflight") public Map<String,Object> preflight() { return preflight.inspect(); }
+    @GetMapping("/runtime") public Map<String,Object> runtime() { return preflight.runtime(); }
     public record RunRequest(UUID releaseId,String mode) {}
     @PostMapping("/run") public ResponseEntity<Map<String,Object>> start(@RequestBody RunRequest request) {
         return ResponseEntity.accepted().body(service.start(request.releaseId(),request.mode()));

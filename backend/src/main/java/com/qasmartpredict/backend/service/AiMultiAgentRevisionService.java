@@ -88,7 +88,7 @@ public class AiMultiAgentRevisionService {
         ObjectNode audit = mapper.valueToTree(evidence);
         audit.set("compactContext", context);
         audit.set("outputSchema", mapper.valueToTree(schema));
-        UUID revisionId = UUID.randomUUID();
+        UUID revisionId = com.qasmartpredict.backend.service.orchestrator.WorkflowArtifactId.next();
         long started = System.nanoTime();
         String raw = null, status = "ERROR", error = null;
         JsonNode revised = null;

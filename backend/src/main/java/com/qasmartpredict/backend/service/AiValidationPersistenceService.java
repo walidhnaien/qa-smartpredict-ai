@@ -40,7 +40,7 @@ public class AiValidationPersistenceService {
             long llamaDurationMs,
             Long judgeDurationMs) {
 
-        UUID id = UUID.randomUUID();
+        UUID id = com.qasmartpredict.backend.service.orchestrator.WorkflowArtifactId.next();
 
         Integer judgeScore = null;
         String judgeIssues = "[]";

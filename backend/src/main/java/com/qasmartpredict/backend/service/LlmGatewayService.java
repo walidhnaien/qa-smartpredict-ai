@@ -13,7 +13,7 @@ import java.util.Map;
 @Service
 public class LlmGatewayService {
 
-    private final RestClient ollamaClient;
+    private final OllamaLifecycleService lifecycle;
     private final ObjectMapper objectMapper;
     private final String model;
 	
@@ -22,26 +22,12 @@ public class LlmGatewayService {
 }
 
     public LlmGatewayService(
-            @Value("${qa.llm.ollama.base-url:http://ollama:11434}")
-            String baseUrl,
+            OllamaLifecycleService lifecycle,
             @Value("${qa.llm.ollama.model:llama3.2:3b}")
             String model,
             ObjectMapper objectMapper) {
 
-        SimpleClientHttpRequestFactory requestFactory =
-                new SimpleClientHttpRequestFactory();
-
-        // 10 seconds to establish the connection
-        requestFactory.setConnectTimeout(10_000);
-
-        // 240 seconds for Ollama to generate the response
-        requestFactory.setReadTimeout(240_000);
-
-        this.ollamaClient = RestClient.builder()
-                .baseUrl(baseUrl)
-                .requestFactory(requestFactory)
-                .build();
-
+        this.lifecycle = lifecycle;
         this.model = model;
         this.objectMapper = objectMapper;
     }
@@ -67,7 +53,7 @@ public class LlmGatewayService {
         Map<String, Object> body = Map.of(
                 "model", model,
                 "stream", false,
-                "keep_alive", 0,
+                "keep_alive", lifecycle.keepAlive(),
                 "format", format,
                 "messages", new Object[] {
                         Map.of(
@@ -92,12 +78,7 @@ public class LlmGatewayService {
                     "[OLLAMA] Starting QA analysis - model: " + model
             );
 
-            JsonNode response = ollamaClient
-                    .post()
-                    .uri("/api/chat")
-                    .body(body)
-                    .retrieve()
-                    .body(JsonNode.class);
+            JsonNode response = lifecycle.chat(body, JsonNode.class);
 
             if (response == null) {
                 throw new IllegalStateException(

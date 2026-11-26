@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class LocalMultiAgentReviewController {
     private final JdbcTemplate jdbc;
     private final ObjectMapper mapper;
-    private final RestClient ollama;
+    private final com.qasmartpredict.backend.service.OllamaLifecycleService lifecycle;
     private final String gemmaModel;
     private final String qwenModel;
     private final QaAgentSkillsService agentSkills;
@@ -29,7 +29,7 @@ public class LocalMultiAgentReviewController {
 
     public LocalMultiAgentReviewController(
             JdbcTemplate jdbc, ObjectMapper mapper,
-            @Value("${qa.llm.ollama.base-url:http://ollama:11434}") String baseUrl,
+            com.qasmartpredict.backend.service.OllamaLifecycleService lifecycle,
             @Value("${qa.llm.gemma.model:gemma3-qa:4b}") String gemmaModel,
             @Value("${qa.llm.qwen.model:qwen2.5:3b}") String qwenModel,
             QaAgentSkillsService agentSkills, com.qasmartpredict.backend.service.AiEvidenceIntelligenceService intelligence, com.qasmartpredict.backend.service.QaEvidenceRegistryService semantic) {
@@ -40,10 +40,7 @@ public class LocalMultiAgentReviewController {
         this.agentSkills = agentSkills;
         this.intelligence = intelligence;
         this.semantic = semantic;
-        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(10_000);
-        factory.setReadTimeout(240_000);
-        this.ollama = RestClient.builder().baseUrl(baseUrl).requestFactory(factory).build();
+        this.lifecycle = lifecycle;
     }
 
     @PostMapping("/review/{validationId}")
@@ -93,7 +90,7 @@ public class LocalMultiAgentReviewController {
     private Map<String, Object> runOne(UUID validationId, UUID batchId,
                                       String role, String model,
                                       String source, String candidate) {
-        UUID reviewId = UUID.randomUUID();
+        UUID reviewId = com.qasmartpredict.backend.service.orchestrator.WorkflowArtifactId.next();
         long start = System.nanoTime();
         String system = agentSkills.nliSystem(role);
         JsonNode official = agentSkills.compactOfficial(readSourceMetrics(source));
@@ -118,16 +115,14 @@ public class LocalMultiAgentReviewController {
             request.put("model", model);
             request.put("stream", false);
             request.put("format", QaNliValidationService.schema(pairs));
-            request.put("keep_alive", 0);
+            request.put("keep_alive", lifecycle.keepAlive());
             request.put("options", Map.of("temperature", 0.1, "num_ctx", 4096, "num_predict", 256,"repeat_penalty", 1.0));
             request.put("messages", List.of(Map.of("role", "system", "content", system),
                     Map.of("role", "user", "content", user)));
             requestPayload = mapper.valueToTree(request);
             if (pairs.isEmpty()) throw new IllegalStateException("No matched NLI pairs; review not performed");
             phase = "OLLAMA_CALL";
-            String responseBody = ollama.post().uri("/api/chat")
-                    .contentType(MediaType.APPLICATION_JSON).body(request)
-                    .retrieve().body(String.class);
+            String responseBody = lifecycle.chat(request, String.class);
             phase = "RESPONSE_PARSE";
             metadata = responseBody == null ? null : mapper.readTree(responseBody);
             if (metadata == null) throw new IllegalStateException("Empty Ollama response");

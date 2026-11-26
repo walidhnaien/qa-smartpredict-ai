@@ -14,13 +14,13 @@ class V351FoundationTest {
     }
     @Test void rejectsUnknownModeBeforeDatabaseAccess() {
         var db=mock(JdbcTemplate.class);
-        var service=new QaOrchestratorService(db,mock(PlatformTransactionManager.class),mock(QaRealWorkflow.class),new com.fasterxml.jackson.databind.ObjectMapper());
+        var service=new QaOrchestratorService(db,mock(PlatformTransactionManager.class),mock(QaRealWorkflow.class),new com.fasterxml.jackson.databind.ObjectMapper(),mock(ResourcePreflightService.class));
         try { assertEquals(400,assertThrows(ResponseStatusException.class,()->service.start(UUID.randomUUID(),"UNKNOWN")).getStatusCode().value()); verifyNoInteractions(db); }
         finally { service.shutdown(); }
     }
     @Test void requiresReleaseId() {
         var db=mock(JdbcTemplate.class);
-        var service=new QaOrchestratorService(db,mock(PlatformTransactionManager.class),mock(QaRealWorkflow.class),new com.fasterxml.jackson.databind.ObjectMapper());
+        var service=new QaOrchestratorService(db,mock(PlatformTransactionManager.class),mock(QaRealWorkflow.class),new com.fasterxml.jackson.databind.ObjectMapper(),mock(ResourcePreflightService.class));
         try { assertEquals(400,assertThrows(ResponseStatusException.class,()->service.start(null,"SIMULATION")).getStatusCode().value()); verifyNoInteractions(db); }
         finally { service.shutdown(); }
     }
